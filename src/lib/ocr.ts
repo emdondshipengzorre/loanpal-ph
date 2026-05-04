@@ -36,8 +36,10 @@ export async function extractTextFromImage(
 function extractAmounts(text: string): number[] {
   const patterns = [
     /(?:PHP|₱|Php)\s*([\d,]+(?:\.\d{2})?)/g,
+    /[#$»¥£€P]\s*([\d,]+\.\d{2})/g,
     /([\d,]+(?:\.\d{2})?)\s*(?:PHP|php|pesos?)/g,
     /(?:amount|total|balance|payment|installment|monthly|due|borrowed|principal|outstanding|remaining)[:\s]*(?:PHP|₱|Php)?\s*([\d,]+(?:\.\d{2})?)/gi,
+    /(?:^|[\s])(\d{1,3}(?:,\d{3})*\.\d{2})(?:\s|$)/gm,
   ];
 
   const amounts: number[] = [];
