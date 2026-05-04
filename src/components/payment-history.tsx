@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { getPaymentsByLoanId } from "@/lib/payments";
+import { useEffect, useState } from "react";
+import { fetchPaymentsByLoanId } from "@/lib/storage";
 import { Payment } from "@/lib/types";
 
 interface PaymentHistoryProps {
@@ -26,11 +26,17 @@ function formatDate(dateStr: string) {
 }
 
 export function PaymentHistory({ loanId }: PaymentHistoryProps) {
-  const [payments] = useState<Payment[]>(() =>
-    getPaymentsByLoanId(loanId).sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-    )
-  );
+  const [payments, setPayments] = useState<Payment[]>([]);
+
+  useEffect(() => {
+    fetchPaymentsByLoanId(loanId).then((data) =>
+      setPayments(
+        data.sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        )
+      )
+    );
+  }, [loanId]);
 
   const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
 

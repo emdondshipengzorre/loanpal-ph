@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { recordPayment } from "@/lib/loans";
+import { recordLoanPayment } from "@/lib/storage";
 
 interface RecordPaymentDialogProps {
   loanId: string;
@@ -33,12 +33,12 @@ export function RecordPaymentDialog({
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [note, setNote] = useState("");
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const parsed = parseFloat(amount);
     if (!parsed || parsed <= 0) return;
 
-    recordPayment(loanId, parsed, date, note || undefined);
+    await recordLoanPayment(loanId, parsed, date, note || undefined);
     setAmount(String(monthlyPayment));
     setDate(new Date().toISOString().split("T")[0]);
     setNote("");

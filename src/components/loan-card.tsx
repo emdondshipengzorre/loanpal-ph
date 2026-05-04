@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loan } from "@/lib/types";
-import { deleteLoan, updateLoan } from "@/lib/loans";
+import { removeLoan, modifyLoan } from "@/lib/storage";
 import { generateGoogleCalendarUrl } from "@/lib/calendar";
 import { buttonVariants } from "@/components/ui/button";
 import { RecordPaymentDialog } from "./record-payment-dialog";
@@ -56,13 +56,13 @@ export function LoanCard({ loan, onUpdate }: LoanCardProps) {
     recurring: true,
   });
 
-  function handleDelete() {
-    deleteLoan(loan.id);
+  async function handleDelete() {
+    await removeLoan(loan.id);
     onUpdate();
   }
 
-  function handleToggleStatus() {
-    updateLoan({
+  async function handleToggleStatus() {
+    await modifyLoan({
       ...loan,
       status: loan.status === "active" ? "paid" : "active",
       remainingBalance: loan.status === "active" ? 0 : loan.remainingBalance,

@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { LOAN_APPS, Loan, LoanApp } from "@/lib/types";
-import { saveLoan } from "@/lib/loans";
+import { createLoan } from "@/lib/storage";
 import { generateGoogleCalendarUrl } from "@/lib/calendar";
 import { buttonVariants } from "@/components/ui/button";
 import { OcrUpload } from "./ocr-upload";
@@ -84,7 +84,7 @@ export function AddLoanDialog({
     setScannedBanner(true);
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!app) return;
 
@@ -102,7 +102,7 @@ export function AddLoanDialog({
       createdAt: new Date().toISOString(),
     };
 
-    saveLoan(loan);
+    await createLoan(loan);
     setLastLoan(loan);
     setShowSuccess(true);
     onLoanAdded();

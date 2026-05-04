@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Loan } from "@/lib/types";
-import { getLoans } from "@/lib/loans";
+import { fetchLoans } from "@/lib/storage";
 import { AddLoanDialog } from "./add-loan-dialog";
 import { LoanCard } from "./loan-card";
 
@@ -20,13 +20,13 @@ export function Dashboard() {
   const [loans, setLoans] = useState<Loan[]>([]);
   const [mounted, setMounted] = useState(false);
 
-  const refresh = useCallback(() => {
-    setLoans(getLoans());
+  const refresh = useCallback(async () => {
+    const data = await fetchLoans();
+    setLoans(data);
   }, []);
 
   useEffect(() => {
-    refresh();
-    setMounted(true);
+    refresh().then(() => setMounted(true));
   }, [refresh]);
 
   if (!mounted) return null;
