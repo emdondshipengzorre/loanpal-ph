@@ -128,7 +128,7 @@ export function HealthScoreView({
       <Card>
         <CardContent className="flex flex-col items-center p-6">
           <p className="mb-1 text-sm text-muted-foreground">
-            Kalusugan ng Bayad
+            Payment Health
           </p>
           <ScoreRing score={result.score} color={result.color} />
           <p className={`mt-2 text-lg font-semibold ${result.color}`}>
@@ -136,12 +136,12 @@ export function HealthScoreView({
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
             {result.score >= 85
-              ? "Galing mo! Maayos ang finances mo!"
+              ? "Great job! Your finances are in good shape!"
               : result.score >= 70
-                ? "Maganda — ituloy mo lang yan"
+                ? "Looking good — keep it up"
                 : result.score >= 50
-                  ? "Pwede pa — unahin mo bayaran ang overdue"
-                  : "Kailangan na kumilos — focus sa mga overdue"}
+                  ? "Room to improve — pay off overdue items first"
+                  : "Needs attention — focus on overdue payments"}
           </p>
         </CardContent>
       </Card>
@@ -150,7 +150,7 @@ export function HealthScoreView({
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
         <div className="rounded-xl border p-3 sm:p-4">
           <p className="text-xs text-muted-foreground sm:text-sm">
-            Buwanang obligasyon
+            Monthly obligations
           </p>
           <p className="text-lg font-bold sm:text-xl">
             {formatPHP(totalMonthly)}
@@ -158,7 +158,7 @@ export function HealthScoreView({
         </div>
         <div className="rounded-xl border p-3 sm:p-4">
           <p className="text-xs text-muted-foreground sm:text-sm">
-            Kabuuang utang
+            Total debt
           </p>
           <p className="text-lg font-bold sm:text-xl">
             {formatPHP(totalDebt)}
@@ -167,7 +167,7 @@ export function HealthScoreView({
         {activeLoans.length > 0 && (
           <div className="col-span-2 rounded-xl border p-3 sm:col-span-1 sm:p-4">
             <p className="text-xs text-muted-foreground sm:text-sm">
-              Utang-free by
+              Debt-free by
             </p>
             <p className="text-lg font-bold sm:text-xl">{debtFreeDateStr}</p>
           </div>
@@ -188,7 +188,7 @@ export function HealthScoreView({
       {result.score < 85 && (
         <Card>
           <CardContent className="p-4 sm:p-6">
-            <p className="text-sm font-semibold">Tips para Bumuti</p>
+            <p className="text-sm font-semibold">Tips to Improve</p>
             <div className="mt-2 grid gap-2">
               {result.breakdown
                 .filter((b) => b.points < b.maxPoints)
@@ -216,14 +216,14 @@ export function HealthScoreView({
 function getTip(label: string): string {
   switch (label) {
     case "Loan Payoff":
-      return "Mag-extra bayad kapag kaya — kahit maliit, malaking tulong sa pagbabayad.";
+      return "Make extra payments when you can — even small ones help reduce your debt faster.";
     case "Bills This Month":
-      return "Bayaran ang natitirang bills ngayong buwan para tumaas ang score mo.";
+      return "Pay your remaining bills this month to raise your score.";
     case "On-Time Status":
-      return "Unahin ang overdue — ito ang pinaka-nakakaapekto sa score mo.";
+      return "Prioritize overdue items — they have the biggest impact on your score.";
     case "Payment Activity":
-      return "I-record ang mga bayad mo para updated ang activity score mo.";
+      return "Record your payments to keep your activity score up to date.";
     default:
-      return "Panatilihing updated ang mga bayad mo para bumuti ang score.";
+      return "Keep your payments up to date to improve your score.";
   }
 }

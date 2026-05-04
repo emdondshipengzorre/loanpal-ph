@@ -80,7 +80,7 @@ export function BatchScanDialog({ onImported }: BatchScanDialogProps) {
       const text = await extractTextFromImage(file, setProgress);
       const parsed = parseMultipleLoans(text);
       if (parsed.length === 0) {
-        setError("Walang ma-detect na loan items. Subukan ang mas malinaw na screenshot.");
+        setError("No loan items detected. Try a clearer screenshot.");
         setStep("upload");
         return;
       }
@@ -94,7 +94,7 @@ export function BatchScanDialog({ onImported }: BatchScanDialogProps) {
       );
       setStep("review");
     } catch {
-      setError("Hindi ma-scan ang image. Subukan ang ibang screenshot.");
+      setError("Could not scan the image. Try a different screenshot.");
       setStep("upload");
     }
   }
@@ -153,7 +153,7 @@ export function BatchScanDialog({ onImported }: BatchScanDialogProps) {
               <DialogTitle>Batch Scan</DialogTitle>
             </DialogHeader>
             <p className="text-sm text-muted-foreground">
-              I-screenshot ang bill list o loan schedule mo, at ma-detect namin lahat ng items.
+              Upload a screenshot of your bill list or loan schedule and we'll detect all the items.
             </p>
             <div
               className="flex min-h-[160px] cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-muted-foreground/25 transition-colors hover:border-muted-foreground/50"
@@ -168,10 +168,10 @@ export function BatchScanDialog({ onImported }: BatchScanDialogProps) {
               ) : (
                 <div className="px-4 py-8 text-center">
                   <p className="text-sm font-medium">
-                    Tap para mag-upload ng screenshot
+                    Tap to upload a screenshot
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Pwede ring mag-camera para i-capture
+                    You can also use your camera to capture
                   </p>
                 </div>
               )}
@@ -202,7 +202,7 @@ export function BatchScanDialog({ onImported }: BatchScanDialogProps) {
             )}
             <div>
               <div className="mb-1 flex justify-between text-xs text-muted-foreground">
-                <span>Binabasa ang text...</span>
+                <span>Reading text...</span>
                 <span>{Math.round(progress * 100)}%</span>
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
@@ -219,11 +219,11 @@ export function BatchScanDialog({ onImported }: BatchScanDialogProps) {
           <>
             <DialogHeader>
               <DialogTitle>
-                Na-detect: {items.length} item{items.length !== 1 ? "s" : ""}
+                Detected: {items.length} item{items.length !== 1 ? "s" : ""}
               </DialogTitle>
             </DialogHeader>
             <p className="text-xs text-muted-foreground">
-              I-check at i-edit ang bawat item bago i-import. I-tap ang checkbox para i-skip.
+              Review and edit each item before importing. Uncheck to skip.
             </p>
             <div className="grid max-h-[50vh] gap-3 overflow-y-auto">
               {items.map((item) => (
@@ -342,18 +342,18 @@ export function BatchScanDialog({ onImported }: BatchScanDialogProps) {
         {step === "done" && (
           <>
             <DialogHeader>
-              <DialogTitle>Na-import na!</DialogTitle>
+              <DialogTitle>Import complete!</DialogTitle>
             </DialogHeader>
             <div className="py-4 text-center">
               <p className="text-4xl font-bold text-primary">
                 {importedCount}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                loan{importedCount !== 1 ? "s" : ""} ang na-add
+                loan{importedCount !== 1 ? "s" : ""} added
               </p>
             </div>
             <p className="text-xs text-muted-foreground">
-              I-check ang bawat loan card at i-edit kung kailangan — lalo na ang amount borrowed at remaining balance.
+              Check each loan card and edit if needed — especially the amount borrowed and remaining balance.
             </p>
             <Button onClick={() => handleClose(false)}>Done</Button>
           </>
