@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { OtpInput } from "./otp-input";
+import { Logo } from "./logo";
 import {
   signInWithGoogle,
   signInWithFacebook,
@@ -132,9 +133,7 @@ export function LoginForm() {
 
       <div className="relative z-10 w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary ring-4 ring-primary/20">
-            <span className="text-3xl font-bold text-primary-foreground">L</span>
-          </div>
+          <Logo size={64} className="mb-4 ring-4 ring-primary/20 rounded-2xl" />
           <h1 className="text-2xl font-bold tracking-tight">LoanPal PH</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Sign in to sync your loans & bills

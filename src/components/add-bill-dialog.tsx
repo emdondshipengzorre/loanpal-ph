@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -103,6 +104,7 @@ export function AddBillDialog({
       <DialogTrigger
         render={<Button size={triggerSize} className={triggerClassName} />}
       >
+        <Plus className="size-4" data-icon="inline-start" />
         {triggerLabel ?? "Add bill"}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">

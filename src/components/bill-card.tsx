@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Pause, Play, Clock, Wallet, CreditCard, CalendarPlus, Trash2 } from "lucide-react";
 import { Bill, BILL_CATEGORY_LABELS } from "@/lib/types";
 import { removeBill, modifyBill, recordBillPayment } from "@/lib/storage";
 import { generateGoogleCalendarUrl } from "@/lib/calendar";
@@ -155,25 +155,30 @@ export function BillCard({ bill, isPaidThisMonth, onUpdate }: BillCardProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem onClick={handleToggleStatus}>
+                {bill.status === "active" ? <Pause /> : <Play />}
                 {bill.status === "active" ? "Pause" : "Resume"}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setShowHistory(!showHistory)}>
+                <Clock />
                 {showHistory ? "Hide history" : "History"}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => window.open("https://gcash.com", "_blank")}
               >
+                <Wallet />
                 Pay via GCash
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => window.open("https://www.maya.ph", "_blank")}
               >
+                <CreditCard />
                 Pay via Maya
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => window.open(calendarUrl, "_blank")}
               >
+                <CalendarPlus />
                 Add to Calendar
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -181,6 +186,7 @@ export function BillCard({ bill, isPaidThisMonth, onUpdate }: BillCardProps) {
                 className="text-destructive data-highlighted:text-destructive"
                 onClick={handleDelete}
               >
+                <Trash2 />
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>

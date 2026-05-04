@@ -9,6 +9,7 @@ import { formatPHP, getCurrentPeriod, ordinalSuffix } from "@/lib/dates";
 import { computeAlerts, fireNotifications, AlertItem } from "@/lib/alerts";
 import { useNotifications } from "@/lib/use-notifications";
 import { Banknote, Receipt, CalendarDays, Heart, BarChart3 } from "lucide-react";
+import { Logo } from "./logo";
 import { AddLoanDialog } from "./add-loan-dialog";
 import { AddBillDialog } from "./add-bill-dialog";
 import { LoanCard } from "./loan-card";
@@ -107,11 +108,7 @@ export function Dashboard() {
           <AuthButton />
         </div>
         <div className="flex max-w-sm flex-col items-center text-center">
-          <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary">
-            <span className="text-3xl font-bold text-primary-foreground">
-              L
-            </span>
-          </div>
+          <Logo size={64} className="mb-8" />
 
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
             LoanPal PH
@@ -155,11 +152,8 @@ export function Dashboard() {
     <div className="mx-auto min-h-screen max-w-2xl px-4 pb-8 pt-6 sm:px-6 sm:py-8">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary sm:h-9 sm:w-9 sm:rounded-xl">
-            <span className="text-base font-bold text-primary-foreground sm:text-lg">
-              L
-            </span>
-          </div>
+          <Logo size={32} className="sm:hidden" />
+          <Logo size={36} className="hidden sm:block" />
           <h1 className="text-lg font-bold tracking-tight sm:text-xl">
             LoanPal PH
           </h1>
@@ -203,7 +197,7 @@ export function Dashboard() {
               className="flex-1 gap-1"
               onClick={() => setActiveTab(tab.key)}
             >
-              <Icon className="size-3.5 shrink-0" />
+              <Icon className="size-4 shrink-0" />
               <span className="hidden min-[400px]:inline text-xs">{tab.label}</span>
             </Button>
           );

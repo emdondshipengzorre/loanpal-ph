@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { ScanLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -149,7 +150,8 @@ export function BatchScanDialog({ onImported }: BatchScanDialogProps) {
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogTrigger render={<Button variant="outline" size="sm" />}>
-        Batch scan
+        <ScanLine className="size-4" data-icon="inline-start" />
+        Scan
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         {step === "upload" && (

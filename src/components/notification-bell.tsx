@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,12 +26,12 @@ export function NotificationBell({ alerts }: NotificationBellProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button variant="ghost" size="sm" className="relative px-2" />
+          <Button variant="ghost" size="icon-sm" className="relative" />
         }
       >
-        <span className="text-base">{"🔔"}</span>
+        <Bell className="size-4" />
         {alerts.length > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-destructive" />
+          <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-destructive ring-2 ring-background" />
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
@@ -39,7 +40,6 @@ export function NotificationBell({ alerts }: NotificationBellProps) {
         </DialogHeader>
 
         <div className="grid gap-4">
-          {/* Notification toggle */}
           <div className="flex items-center justify-between rounded-lg border p-3">
             <div>
               <p className="text-sm font-medium">Browser notifications</p>
@@ -65,9 +65,9 @@ export function NotificationBell({ alerts }: NotificationBellProps) {
             </Button>
           </div>
 
-          {/* Alert list */}
           {alerts.length === 0 ? (
             <div className="py-6 text-center">
+              <Bell className="mx-auto mb-2 size-6 text-muted-foreground/40" />
               <p className="text-sm text-muted-foreground">
                 All clear! No upcoming payments.
               </p>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AlertTriangle, Bell, X } from "lucide-react";
 import { AlertItem } from "@/lib/alerts";
 import { formatPHP, formatDate } from "@/lib/dates";
 import { Button } from "@/components/ui/button";
@@ -35,8 +36,13 @@ export function AlertBanner({ alerts }: AlertBannerProps) {
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1">
-          <p className="text-sm font-semibold">
-            {hasOverdue ? "⚠" : "🔔"} {summary}
+          <p className="flex items-center gap-1.5 text-sm font-semibold">
+            {hasOverdue ? (
+              <AlertTriangle className="size-4 shrink-0" />
+            ) : (
+              <Bell className="size-4 shrink-0" />
+            )}
+            {summary}
           </p>
           <div className="mt-1.5 grid gap-1">
             {alerts.slice(0, 5).map((alert) => (
@@ -60,11 +66,11 @@ export function AlertBanner({ alerts }: AlertBannerProps) {
         </div>
         <Button
           variant="ghost"
-          size="sm"
-          className="h-6 w-6 shrink-0 p-0"
+          size="icon-sm"
+          className="shrink-0"
           onClick={() => setDismissed(true)}
         >
-          &#10005;
+          <X className="size-4" />
         </Button>
       </div>
     </div>

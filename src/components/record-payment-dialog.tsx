@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -48,7 +49,8 @@ export function RecordPaymentDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button variant="outline" size="sm" />}>
+      <DialogTrigger render={<Button size="sm" />}>
+        <Plus className="size-4" data-icon="inline-start" />
         Record payment
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">

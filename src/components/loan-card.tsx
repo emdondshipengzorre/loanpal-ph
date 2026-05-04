@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, CheckCircle, RotateCcw, Pencil, Clock, Wallet, CreditCard, CalendarPlus, Trash2 } from "lucide-react";
 import { Loan } from "@/lib/types";
 import { removeLoan, modifyLoan } from "@/lib/storage";
 import { generateGoogleCalendarUrl } from "@/lib/calendar";
@@ -138,28 +138,34 @@ export function LoanCard({ loan, onUpdate }: LoanCardProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem onClick={handleToggleStatus}>
+                {loan.status === "active" ? <CheckCircle /> : <RotateCcw />}
                 {loan.status === "active" ? "Mark as paid" : "Reactivate"}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                <Pencil />
                 Edit
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setShowHistory(!showHistory)}>
+                <Clock />
                 {showHistory ? "Hide history" : "History"}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => window.open("https://gcash.com", "_blank")}
               >
+                <Wallet />
                 Pay via GCash
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => window.open("https://www.maya.ph", "_blank")}
               >
+                <CreditCard />
                 Pay via Maya
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => window.open(calendarUrl, "_blank")}
               >
+                <CalendarPlus />
                 Add to Calendar
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -167,6 +173,7 @@ export function LoanCard({ loan, onUpdate }: LoanCardProps) {
                 className="text-destructive data-highlighted:text-destructive"
                 onClick={handleDelete}
               >
+                <Trash2 />
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
