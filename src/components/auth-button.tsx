@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { signInWithGoogle, signOut, onAuthChange } from "@/lib/storage";
+import { signOut, onAuthChange } from "@/lib/storage";
 
 interface AuthUser {
   id: string;
@@ -36,7 +37,7 @@ export function AuthButton() {
   }
 
   return (
-    <Button variant="outline" size="sm" onClick={() => signInWithGoogle()}>
+    <Button variant="outline" size="sm" render={<Link href="/login" />}>
       Sign in
     </Button>
   );

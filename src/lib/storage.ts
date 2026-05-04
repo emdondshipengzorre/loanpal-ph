@@ -25,7 +25,59 @@ export async function signInWithGoogle() {
   const sb = await getSupabase();
   return sb.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: `${window.location.origin}/` },
+    options: { redirectTo: `${window.location.origin}/auth/callback` },
+  });
+}
+
+export async function signInWithFacebook() {
+  const sb = await getSupabase();
+  return sb.auth.signInWithOAuth({
+    provider: "facebook",
+    options: { redirectTo: `${window.location.origin}/auth/callback` },
+  });
+}
+
+export async function signUpWithEmail(email: string, password: string) {
+  const sb = await getSupabase();
+  return sb.auth.signUp({
+    email,
+    password,
+    options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+  });
+}
+
+export async function signInWithEmail(email: string, password: string) {
+  const sb = await getSupabase();
+  return sb.auth.signInWithPassword({ email, password });
+}
+
+export async function signInWithMagicLink(email: string) {
+  const sb = await getSupabase();
+  return sb.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+  });
+}
+
+export async function signInWithPhone(phone: string) {
+  const sb = await getSupabase();
+  return sb.auth.signInWithOtp({ phone });
+}
+
+export async function verifyPhoneOtp(phone: string, token: string) {
+  const sb = await getSupabase();
+  return sb.auth.verifyOtp({ phone, token, type: "sms" });
+}
+
+export async function verifyEmailOtp(email: string, token: string) {
+  const sb = await getSupabase();
+  return sb.auth.verifyOtp({ email, token, type: "email" });
+}
+
+export async function resetPassword(email: string) {
+  const sb = await getSupabase();
+  return sb.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/auth/callback`,
   });
 }
 
