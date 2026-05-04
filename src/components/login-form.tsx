@@ -62,14 +62,22 @@ export function LoginForm() {
 
   async function handleGoogle() {
     clearMessages();
-    const { error } = await signInWithGoogle();
-    if (error) setError(mapError(error.message));
+    try {
+      const { error } = await signInWithGoogle();
+      if (error) setError(mapError(error.message));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to start Google sign-in.");
+    }
   }
 
   async function handleFacebook() {
     clearMessages();
-    const { error } = await signInWithFacebook();
-    if (error) setError(mapError(error.message));
+    try {
+      const { error } = await signInWithFacebook();
+      if (error) setError(mapError(error.message));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to start Facebook sign-in.");
+    }
   }
 
   async function handlePhoneSend() {
@@ -122,7 +130,7 @@ export function LoginForm() {
         <div className="absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
       </div>
 
-      <div className="relative w-full max-w-sm">
+      <div className="relative z-10 w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center text-center">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary ring-4 ring-primary/20">
             <span className="text-3xl font-bold text-primary-foreground">L</span>
