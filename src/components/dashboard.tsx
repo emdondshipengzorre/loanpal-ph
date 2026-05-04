@@ -2,11 +2,17 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
-import { Loan } from "@/lib/types";
-import { fetchLoans } from "@/lib/storage";
+import { Button } from "@/components/ui/button";
+import { Loan, Bill, BillPayment } from "@/lib/types";
+import { fetchLoans, fetchBills, fetchBillPaymentsForPeriod } from "@/lib/storage";
 import { AddLoanDialog } from "./add-loan-dialog";
+import { AddBillDialog } from "./add-bill-dialog";
 import { LoanCard } from "./loan-card";
+import { BillCard } from "./bill-card";
+import { PayDayPlanner } from "./pay-day-planner";
 import { AuthButton } from "./auth-button";
+
+type Tab = "loans" | "bills" | "planner";
 
 function formatPHP(amount: number) {
   return new Intl.NumberFormat("en-PH", {
@@ -17,13 +23,36 @@ function formatPHP(amount: number) {
   }).format(amount);
 }
 
+function getCurrentPeriod(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function ordinalSuffix(day: number): string {
+  if (day >= 11 && day <= 13) return `${day}th`;
+  const lastDigit = day % 10;
+  if (lastDigit === 1) return `${day}st`;
+  if (lastDigit === 2) return `${day}nd`;
+  if (lastDigit === 3) return `${day}rd`;
+  return `${day}th`;
+}
+
 export function Dashboard() {
   const [loans, setLoans] = useState<Loan[]>([]);
+  const [bills, setBills] = useState<Bill[]>([]);
+  const [billPayments, setBillPayments] = useState<BillPayment[]>([]);
   const [mounted, setMounted] = useState(false);
+  const [activeTab, setActiveTab] = useState<Tab>("loans");
 
   const refresh = useCallback(async () => {
-    const data = await fetchLoans();
-    setLoans(data);
+    const [loanData, billData, periodPayments] = await Promise.all([
+      fetchLoans(),
+      fetchBills(),
+      fetchBillPaymentsForPeriod(getCurrentPeriod()),
+    ]);
+    setLoans(loanData);
+    setBills(billData);
+    setBillPayments(periodPayments);
   }, []);
 
   useEffect(() => {
@@ -42,7 +71,24 @@ export function Dashboard() {
     0
   );
 
-  if (loans.length === 0) {
+  const activeBills = bills.filter((b) => b.status === "active");
+  const totalMonthlyBills = activeBills.reduce(
+    (sum, b) => sum + b.typicalAmount,
+    0
+  );
+  const paidBillIds = new Set(billPayments.map((p) => p.billId));
+
+  const nextDueBill = activeBills
+    .filter((b) => !paidBillIds.has(b.id))
+    .sort((a, b) => {
+      const now = new Date();
+      const dayOfMonth = now.getDate();
+      const aDist = a.dueDay >= dayOfMonth ? a.dueDay - dayOfMonth : a.dueDay + 31 - dayOfMonth;
+      const bDist = b.dueDay >= dayOfMonth ? b.dueDay - dayOfMonth : b.dueDay + 31 - dayOfMonth;
+      return aDist - bDist;
+    })[0];
+
+  if (loans.length === 0 && bills.length === 0) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center px-6">
         <div className="absolute right-4 top-4">
@@ -60,20 +106,26 @@ export function Dashboard() {
           </h1>
 
           <p className="mt-3 text-base text-muted-foreground sm:text-lg">
-            Manage all your loans in one place
+            Manage your loans and bills in one place
           </p>
 
           <p className="mt-2 text-sm text-muted-foreground">
-            Track HomeCredit, Tala, Cashalo, Atome, GLoan and more — never miss
+            Track HomeCredit, Tala, Meralco, PLDT and more — never miss
             a payment again.
           </p>
 
-          <AddLoanDialog
-            onLoanAdded={refresh}
-            triggerLabel="Add your first loan"
-            triggerSize="lg"
-            triggerClassName="mt-8 h-12 px-6 text-base"
-          />
+          <div className="mt-8 flex gap-3">
+            <AddLoanDialog
+              onLoanAdded={refresh}
+              triggerLabel="Add a loan"
+              triggerSize="default"
+            />
+            <AddBillDialog
+              onBillAdded={refresh}
+              triggerLabel="Add a bill"
+              triggerSize="default"
+            />
+          </div>
 
           <p className="mt-12 text-xs text-muted-foreground/60">
             Built for Filipinos, by Filipinos
@@ -97,37 +149,139 @@ export function Dashboard() {
           </h1>
         </div>
         <div className="flex items-center gap-2">
-          <AddLoanDialog onLoanAdded={refresh} triggerSize="sm" />
+          {activeTab === "loans" && (
+            <AddLoanDialog onLoanAdded={refresh} triggerSize="sm" />
+          )}
+          {activeTab === "bills" && (
+            <AddBillDialog onBillAdded={refresh} triggerSize="sm" />
+          )}
           <AuthButton />
         </div>
       </div>
 
       <Separator className="my-4 sm:my-6" />
 
-      <div className="mb-4 grid grid-cols-1 gap-3 sm:mb-6 sm:grid-cols-3 sm:gap-4">
-        <div className="flex items-center justify-between rounded-xl border p-3 sm:block sm:p-4">
-          <p className="text-sm text-muted-foreground">Active loans</p>
-          <p className="text-xl font-bold sm:text-2xl">{activeLoans.length}</p>
-        </div>
-        <div className="flex items-center justify-between rounded-xl border p-3 sm:block sm:p-4">
-          <p className="text-sm text-muted-foreground">Total remaining</p>
-          <p className="text-xl font-bold sm:text-2xl">
-            {formatPHP(totalRemaining)}
-          </p>
-        </div>
-        <div className="flex items-center justify-between rounded-xl border p-3 sm:block sm:p-4">
-          <p className="text-sm text-muted-foreground">Monthly payments</p>
-          <p className="text-xl font-bold sm:text-2xl">
-            {formatPHP(totalMonthly)}
-          </p>
-        </div>
-      </div>
-
-      <div className="grid gap-3 sm:gap-4">
-        {loans.map((loan) => (
-          <LoanCard key={loan.id} loan={loan} onUpdate={refresh} />
+      {/* Tab switcher */}
+      <div className="mb-4 flex gap-1 rounded-lg bg-muted p-1 sm:mb-6">
+        {(
+          [
+            { key: "loans", label: "Loans" },
+            { key: "bills", label: "Bills" },
+            { key: "planner", label: "Pay Day" },
+          ] as const
+        ).map((tab) => (
+          <Button
+            key={tab.key}
+            variant={activeTab === tab.key ? "default" : "ghost"}
+            size="sm"
+            className="flex-1"
+            onClick={() => setActiveTab(tab.key)}
+          >
+            {tab.label}
+          </Button>
         ))}
       </div>
+
+      {/* Stats grid */}
+      {activeTab === "loans" && (
+        <div className="mb-4 grid grid-cols-1 gap-3 sm:mb-6 sm:grid-cols-3 sm:gap-4">
+          <div className="flex items-center justify-between rounded-xl border p-3 sm:block sm:p-4">
+            <p className="text-sm text-muted-foreground">Active loans</p>
+            <p className="text-xl font-bold sm:text-2xl">
+              {activeLoans.length}
+            </p>
+          </div>
+          <div className="flex items-center justify-between rounded-xl border p-3 sm:block sm:p-4">
+            <p className="text-sm text-muted-foreground">Total remaining</p>
+            <p className="text-xl font-bold sm:text-2xl">
+              {formatPHP(totalRemaining)}
+            </p>
+          </div>
+          <div className="flex items-center justify-between rounded-xl border p-3 sm:block sm:p-4">
+            <p className="text-sm text-muted-foreground">Monthly payments</p>
+            <p className="text-xl font-bold sm:text-2xl">
+              {formatPHP(totalMonthly)}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "bills" && (
+        <div className="mb-4 grid grid-cols-1 gap-3 sm:mb-6 sm:grid-cols-3 sm:gap-4">
+          <div className="flex items-center justify-between rounded-xl border p-3 sm:block sm:p-4">
+            <p className="text-sm text-muted-foreground">Active bills</p>
+            <p className="text-xl font-bold sm:text-2xl">
+              {activeBills.length}
+            </p>
+          </div>
+          <div className="flex items-center justify-between rounded-xl border p-3 sm:block sm:p-4">
+            <p className="text-sm text-muted-foreground">Monthly bills</p>
+            <p className="text-xl font-bold sm:text-2xl">
+              {formatPHP(totalMonthlyBills)}
+            </p>
+          </div>
+          <div className="flex items-center justify-between rounded-xl border p-3 sm:block sm:p-4">
+            <p className="text-sm text-muted-foreground">Next due</p>
+            <p className="text-xl font-bold sm:text-2xl">
+              {nextDueBill
+                ? `${nextDueBill.provider === "Other" ? nextDueBill.customProviderName : nextDueBill.provider} (${ordinalSuffix(nextDueBill.dueDay)})`
+                : "All paid!"}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Content */}
+      {activeTab === "loans" && (
+        loans.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <p className="text-muted-foreground">No loans yet.</p>
+            <AddLoanDialog
+              onLoanAdded={refresh}
+              triggerLabel="Add your first loan"
+              triggerClassName="mt-4"
+            />
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:gap-4">
+            {loans.map((loan) => (
+              <LoanCard key={loan.id} loan={loan} onUpdate={refresh} />
+            ))}
+          </div>
+        )
+      )}
+
+      {activeTab === "bills" && (
+        bills.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <p className="text-muted-foreground">No bills yet.</p>
+            <AddBillDialog
+              onBillAdded={refresh}
+              triggerLabel="Add your first bill"
+              triggerClassName="mt-4"
+            />
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:gap-4">
+            {bills.map((bill) => (
+              <BillCard
+                key={bill.id}
+                bill={bill}
+                isPaidThisMonth={paidBillIds.has(bill.id)}
+                onUpdate={refresh}
+              />
+            ))}
+          </div>
+        )
+      )}
+
+      {activeTab === "planner" && (
+        <PayDayPlanner
+          loans={loans}
+          bills={bills}
+          billPayments={billPayments}
+        />
+      )}
     </div>
   );
 }

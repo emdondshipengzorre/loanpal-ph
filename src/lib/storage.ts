@@ -1,7 +1,9 @@
-import { Loan, Payment } from "./types";
+import { Loan, Payment, Bill, BillPayment } from "./types";
 
 const LOANS_KEY = "loanpal-loans";
 const PAYMENTS_KEY = "loanpal-payments";
+const BILLS_KEY = "loanpal-bills";
+const BILL_PAYMENTS_KEY = "loanpal-bill-payments";
 
 function useSupabase() {
   return (
@@ -178,6 +180,143 @@ export async function recordLoanPayment(
   });
 }
 
+// --- Bills ---
+
+export async function fetchBills(): Promise<Bill[]> {
+  if (!useSupabase()) {
+    if (typeof window === "undefined") return [];
+    const data = localStorage.getItem(BILLS_KEY);
+    return data ? JSON.parse(data) : [];
+  }
+  const sb = await getSupabase();
+  const { data } = await sb
+    .from("bills")
+    .select("*")
+    .order("created_at", { ascending: false });
+  return (data ?? []).map(dbBillToBill);
+}
+
+export async function createBill(bill: Bill): Promise<void> {
+  if (!useSupabase()) {
+    if (typeof window === "undefined") return;
+    const bills = JSON.parse(localStorage.getItem(BILLS_KEY) || "[]");
+    bills.push(bill);
+    localStorage.setItem(BILLS_KEY, JSON.stringify(bills));
+    return;
+  }
+  const sb = await getSupabase();
+  const user = await getUser();
+  await sb.from("bills").insert(billToDb(bill, user?.id));
+}
+
+export async function modifyBill(updated: Bill): Promise<void> {
+  if (!useSupabase()) {
+    if (typeof window === "undefined") return;
+    const bills: Bill[] = JSON.parse(
+      localStorage.getItem(BILLS_KEY) || "[]"
+    ).map((b: Bill) => (b.id === updated.id ? updated : b));
+    localStorage.setItem(BILLS_KEY, JSON.stringify(bills));
+    return;
+  }
+  const sb = await getSupabase();
+  await sb
+    .from("bills")
+    .update({
+      category: updated.category,
+      provider: updated.provider,
+      custom_provider_name: updated.customProviderName || null,
+      typical_amount: updated.typicalAmount,
+      due_day: updated.dueDay,
+      status: updated.status,
+      notes: updated.notes || null,
+    })
+    .eq("id", updated.id);
+}
+
+export async function removeBill(id: string): Promise<void> {
+  if (!useSupabase()) {
+    if (typeof window === "undefined") return;
+    const bills = JSON.parse(localStorage.getItem(BILLS_KEY) || "[]").filter(
+      (b: Bill) => b.id !== id
+    );
+    localStorage.setItem(BILLS_KEY, JSON.stringify(bills));
+    return;
+  }
+  const sb = await getSupabase();
+  await sb.from("bills").delete().eq("id", id);
+}
+
+// --- Bill Payments ---
+
+export async function fetchBillPaymentsByBillId(
+  billId: string
+): Promise<BillPayment[]> {
+  if (!useSupabase()) {
+    if (typeof window === "undefined") return [];
+    const data = localStorage.getItem(BILL_PAYMENTS_KEY);
+    const all: BillPayment[] = data ? JSON.parse(data) : [];
+    return all.filter((p) => p.billId === billId);
+  }
+  const sb = await getSupabase();
+  const { data } = await sb
+    .from("bill_payments")
+    .select("*")
+    .eq("bill_id", billId)
+    .order("date", { ascending: false });
+  return (data ?? []).map(dbBillPaymentToBillPayment);
+}
+
+export async function fetchBillPaymentsForPeriod(
+  period: string
+): Promise<BillPayment[]> {
+  if (!useSupabase()) {
+    if (typeof window === "undefined") return [];
+    const data = localStorage.getItem(BILL_PAYMENTS_KEY);
+    const all: BillPayment[] = data ? JSON.parse(data) : [];
+    return all.filter((p) => p.period === period);
+  }
+  const sb = await getSupabase();
+  const { data } = await sb
+    .from("bill_payments")
+    .select("*")
+    .eq("period", period);
+  return (data ?? []).map(dbBillPaymentToBillPayment);
+}
+
+export async function createBillPayment(payment: BillPayment): Promise<void> {
+  if (!useSupabase()) {
+    if (typeof window === "undefined") return;
+    const payments = JSON.parse(
+      localStorage.getItem(BILL_PAYMENTS_KEY) || "[]"
+    );
+    payments.push(payment);
+    localStorage.setItem(BILL_PAYMENTS_KEY, JSON.stringify(payments));
+    return;
+  }
+  const sb = await getSupabase();
+  const user = await getUser();
+  await sb.from("bill_payments").insert(billPaymentToDb(payment, user?.id));
+}
+
+export async function recordBillPayment(
+  billId: string,
+  amount: number,
+  date: string,
+  period: string,
+  note?: string
+): Promise<void> {
+  const payment: BillPayment = {
+    id: crypto.randomUUID(),
+    billId,
+    amount,
+    date,
+    period,
+    note,
+    createdAt: new Date().toISOString(),
+  };
+  await createBillPayment(payment);
+}
+
 // --- DB <-> App type mappers ---
 
 function dbLoanToLoan(row: Record<string, unknown>): Loan {
@@ -227,6 +366,60 @@ function paymentToDb(payment: Payment, userId?: string) {
     loan_id: payment.loanId,
     amount: payment.amount,
     date: payment.date,
+    note: payment.note || null,
+    created_at: payment.createdAt,
+  };
+}
+
+function dbBillToBill(row: Record<string, unknown>): Bill {
+  return {
+    id: row.id as string,
+    category: row.category as Bill["category"],
+    provider: row.provider as string,
+    customProviderName: (row.custom_provider_name as string) || undefined,
+    typicalAmount: row.typical_amount as number,
+    dueDay: row.due_day as number,
+    status: row.status as Bill["status"],
+    notes: (row.notes as string) || undefined,
+    createdAt: row.created_at as string,
+  };
+}
+
+function billToDb(bill: Bill, userId?: string) {
+  return {
+    id: bill.id,
+    user_id: userId,
+    category: bill.category,
+    provider: bill.provider,
+    custom_provider_name: bill.customProviderName || null,
+    typical_amount: bill.typicalAmount,
+    due_day: bill.dueDay,
+    status: bill.status,
+    notes: bill.notes || null,
+    created_at: bill.createdAt,
+  };
+}
+
+function dbBillPaymentToBillPayment(row: Record<string, unknown>): BillPayment {
+  return {
+    id: row.id as string,
+    billId: row.bill_id as string,
+    amount: row.amount as number,
+    date: row.date as string,
+    period: row.period as string,
+    note: (row.note as string) || undefined,
+    createdAt: row.created_at as string,
+  };
+}
+
+function billPaymentToDb(payment: BillPayment, userId?: string) {
+  return {
+    id: payment.id,
+    user_id: userId,
+    bill_id: payment.billId,
+    amount: payment.amount,
+    date: payment.date,
+    period: payment.period,
     note: payment.note || null,
     created_at: payment.createdAt,
   };

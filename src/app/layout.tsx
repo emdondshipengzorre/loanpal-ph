@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "LoanPal PH",
-  description: "Manage all your loans in one place",
+  description: "Manage your loans and bills in one place",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
