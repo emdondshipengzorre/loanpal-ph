@@ -17,6 +17,7 @@ import { AlertBanner } from "./alert-banner";
 import { NotificationBell } from "./notification-bell";
 import { HealthScoreView } from "./health-score-view";
 import { AuthButton } from "./auth-button";
+import { BatchScanDialog } from "./batch-scan-dialog";
 
 type Tab = "loans" | "bills" | "planner" | "health";
 
@@ -159,7 +160,10 @@ export function Dashboard() {
         </div>
         <div className="flex items-center gap-2">
           {activeTab === "loans" && (
-            <AddLoanDialog onLoanAdded={refresh} triggerSize="sm" />
+            <>
+              <BatchScanDialog onImported={refresh} />
+              <AddLoanDialog onLoanAdded={refresh} triggerSize="sm" />
+            </>
           )}
           {activeTab === "bills" && (
             <AddBillDialog onBillAdded={refresh} triggerSize="sm" />
