@@ -18,8 +18,9 @@ import { NotificationBell } from "./notification-bell";
 import { HealthScoreView } from "./health-score-view";
 import { AuthButton } from "./auth-button";
 import { BatchScanDialog } from "./batch-scan-dialog";
+import { FinancialOverview } from "./financial-overview";
 
-type Tab = "loans" | "bills" | "planner" | "health";
+type Tab = "loans" | "bills" | "planner" | "health" | "overview";
 
 export function Dashboard() {
   const [loans, setLoans] = useState<Loan[]>([]);
@@ -181,6 +182,7 @@ export function Dashboard() {
       <div className="mb-4 flex gap-1 rounded-lg bg-muted p-1 sm:mb-6">
         {(
           [
+            { key: "overview", label: "Overview" },
             { key: "loans", label: "Loans" },
             { key: "bills", label: "Bills" },
             { key: "planner", label: "Planner" },
@@ -307,6 +309,10 @@ export function Dashboard() {
           bills={bills}
           billPayments={allBillPayments}
         />
+      )}
+
+      {activeTab === "overview" && (
+        <FinancialOverview loans={loans} bills={bills} />
       )}
     </div>
   );

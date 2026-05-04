@@ -10,6 +10,7 @@ import { generateGoogleCalendarUrl } from "@/lib/calendar";
 import { buttonVariants } from "@/components/ui/button";
 import { formatPHP, formatDate, getDaysUntilDate } from "@/lib/dates";
 import { RecordPaymentDialog } from "./record-payment-dialog";
+import { EditLoanDialog } from "./edit-loan-dialog";
 import { PaymentHistory } from "./payment-history";
 
 interface LoanCardProps {
@@ -148,6 +149,7 @@ export function LoanCard({ loan, onUpdate }: LoanCardProps) {
           >
             Calendar
           </a>
+          <EditLoanDialog loan={loan} onUpdated={onUpdate} />
           <Button
             variant="ghost"
             size="sm"

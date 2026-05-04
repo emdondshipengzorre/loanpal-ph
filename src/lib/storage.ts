@@ -4,6 +4,7 @@ const LOANS_KEY = "loanpal-loans";
 const PAYMENTS_KEY = "loanpal-payments";
 const BILLS_KEY = "loanpal-bills";
 const BILL_PAYMENTS_KEY = "loanpal-bill-payments";
+const INCOME_KEY = "loanpal-monthly-income";
 
 function useSupabase() {
   return (
@@ -92,7 +93,11 @@ export async function modifyLoan(updated: Loan): Promise<void> {
   await sb
     .from("loans")
     .update({
+      app: updated.app,
+      custom_app_name: updated.customAppName || null,
+      amount_borrowed: updated.amountBorrowed,
       remaining_balance: updated.remainingBalance,
+      monthly_payment: updated.monthlyPayment,
       next_due_date: updated.nextDueDate,
       status: updated.status,
     })
@@ -451,4 +456,17 @@ function billPaymentToDb(payment: BillPayment, userId?: string) {
     note: payment.note || null,
     created_at: payment.createdAt,
   };
+}
+
+// --- Monthly Income ---
+
+export function getMonthlyIncome(): number {
+  if (typeof window === "undefined") return 0;
+  const val = localStorage.getItem(INCOME_KEY);
+  return val ? parseFloat(val) : 0;
+}
+
+export function setMonthlyIncome(amount: number): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(INCOME_KEY, String(amount));
 }
