@@ -1,10 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loan } from "@/lib/types";
 import { deleteLoan, updateLoan } from "@/lib/loans";
+import { generateGoogleCalendarUrl } from "@/lib/calendar";
+import { buttonVariants } from "@/components/ui/button";
+import { RecordPaymentDialog } from "./record-payment-dialog";
+import { PaymentHistory } from "./payment-history";
 
 interface LoanCardProps {
   loan: Loan;
@@ -36,11 +41,20 @@ function formatDate(dateStr: string) {
 }
 
 export function LoanCard({ loan, onUpdate }: LoanCardProps) {
+  const [showHistory, setShowHistory] = useState(false);
+
   const displayName =
     loan.app === "Other" ? loan.customAppName || "Other" : loan.app;
   const daysUntilDue = getDaysUntilDue(loan.nextDueDate);
   const progress =
     ((loan.amountBorrowed - loan.remainingBalance) / loan.amountBorrowed) * 100;
+
+  const calendarUrl = generateGoogleCalendarUrl({
+    title: `${displayName} loan payment — ${formatPHP(loan.monthlyPayment)}`,
+    date: loan.nextDueDate,
+    description: `Monthly payment of ${formatPHP(loan.monthlyPayment)} for ${displayName}.\nRemaining: ${formatPHP(loan.remainingBalance)}`,
+    recurring: true,
+  });
 
   function handleDelete() {
     deleteLoan(loan.id);
@@ -102,9 +116,11 @@ export function LoanCard({ loan, onUpdate }: LoanCardProps) {
             <p className="text-muted-foreground">Due date</p>
             <p className="font-medium">
               {formatDate(loan.nextDueDate)}
-              {loan.status === "active" && daysUntilDue <= 3 && daysUntilDue >= 0 && (
-                <span className="ml-1 text-xs text-destructive">Soon!</span>
-              )}
+              {loan.status === "active" &&
+                daysUntilDue <= 3 &&
+                daysUntilDue >= 0 && (
+                  <span className="ml-1 text-xs text-destructive">Soon!</span>
+                )}
               {loan.status === "active" && daysUntilDue < 0 && (
                 <span className="ml-1 text-xs text-destructive">Overdue</span>
               )}
@@ -112,14 +128,40 @@ export function LoanCard({ loan, onUpdate }: LoanCardProps) {
           </div>
         </div>
 
-        <div className="mt-4 flex gap-2">
+        <div className="mt-4 flex flex-wrap gap-2">
+          {loan.status === "active" && (
+            <RecordPaymentDialog
+              loanId={loan.id}
+              loanName={displayName}
+              monthlyPayment={loan.monthlyPayment}
+              remainingBalance={loan.remainingBalance}
+              onPaymentRecorded={onUpdate}
+            />
+          )}
           <Button variant="outline" size="sm" onClick={handleToggleStatus}>
             {loan.status === "active" ? "Mark as paid" : "Reactivate"}
+          </Button>
+          <a
+            href={calendarUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            Add to Calendar
+          </a>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowHistory(!showHistory)}
+          >
+            {showHistory ? "Hide history" : "View history"}
           </Button>
           <Button variant="ghost" size="sm" onClick={handleDelete}>
             Delete
           </Button>
         </div>
+
+        {showHistory && <PaymentHistory loanId={loan.id} />}
       </CardContent>
     </Card>
   );

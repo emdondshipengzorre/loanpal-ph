@@ -21,8 +21,16 @@ export interface Loan {
   amountBorrowed: number;
   remainingBalance: number;
   monthlyPayment: number;
-  interestRate: number;
   nextDueDate: string;
   status: "active" | "paid";
+  createdAt: string;
+}
+
+export interface Payment {
+  id: string;
+  loanId: string;
+  amount: number;
+  date: string;
+  note?: string;
   createdAt: string;
 }

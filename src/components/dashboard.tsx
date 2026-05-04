@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Loan } from "@/lib/types";
 import { getLoans } from "@/lib/loans";
@@ -19,6 +18,7 @@ function formatPHP(amount: number) {
 
 export function Dashboard() {
   const [loans, setLoans] = useState<Loan[]>([]);
+  const [mounted, setMounted] = useState(false);
 
   const refresh = useCallback(() => {
     setLoans(getLoans());
@@ -26,7 +26,10 @@ export function Dashboard() {
 
   useEffect(() => {
     refresh();
+    setMounted(true);
   }, [refresh]);
+
+  if (!mounted) return null;
 
   const activeLoans = loans.filter((l) => l.status === "active");
   const totalRemaining = activeLoans.reduce(
@@ -59,11 +62,12 @@ export function Dashboard() {
             a payment again.
           </p>
 
-          <AddLoanDialog onLoanAdded={refresh}>
-            <Button size="lg" className="mt-8">
-              Add your first loan
-            </Button>
-          </AddLoanDialog>
+          <AddLoanDialog
+            onLoanAdded={refresh}
+            triggerLabel="Add your first loan"
+            triggerSize="lg"
+            triggerClassName="mt-8"
+          />
 
           <p className="mt-12 text-xs text-muted-foreground/60">
             Built for Filipinos, by Filipinos
@@ -82,9 +86,7 @@ export function Dashboard() {
           </div>
           <h1 className="text-xl font-bold tracking-tight">LoanPal PH</h1>
         </div>
-        <AddLoanDialog onLoanAdded={refresh}>
-          <Button size="sm">Add loan</Button>
-        </AddLoanDialog>
+        <AddLoanDialog onLoanAdded={refresh} triggerSize="sm" />
       </div>
 
       <Separator className="my-6" />
