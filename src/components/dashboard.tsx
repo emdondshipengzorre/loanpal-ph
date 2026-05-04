@@ -6,6 +6,7 @@ import { Loan } from "@/lib/types";
 import { fetchLoans } from "@/lib/storage";
 import { AddLoanDialog } from "./add-loan-dialog";
 import { LoanCard } from "./loan-card";
+import { AuthButton } from "./auth-button";
 
 function formatPHP(amount: number) {
   return new Intl.NumberFormat("en-PH", {
@@ -44,6 +45,9 @@ export function Dashboard() {
   if (loans.length === 0) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center px-6">
+        <div className="absolute right-4 top-4">
+          <AuthButton />
+        </div>
         <div className="flex max-w-sm flex-col items-center text-center">
           <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary">
             <span className="text-3xl font-bold text-primary-foreground">
@@ -92,7 +96,10 @@ export function Dashboard() {
             LoanPal PH
           </h1>
         </div>
-        <AddLoanDialog onLoanAdded={refresh} triggerSize="sm" />
+        <div className="flex items-center gap-2">
+          <AddLoanDialog onLoanAdded={refresh} triggerSize="sm" />
+          <AuthButton />
+        </div>
       </div>
 
       <Separator className="my-4 sm:my-6" />
