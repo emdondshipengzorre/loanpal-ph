@@ -24,10 +24,14 @@ import { modifyLoan } from "@/lib/storage";
 interface EditLoanDialogProps {
   loan: Loan;
   onUpdated: () => void;
+  externalOpen?: boolean;
+  onExternalOpenChange?: (open: boolean) => void;
 }
 
-export function EditLoanDialog({ loan, onUpdated }: EditLoanDialogProps) {
-  const [open, setOpen] = useState(false);
+export function EditLoanDialog({ loan, onUpdated, externalOpen, onExternalOpenChange }: EditLoanDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = externalOpen ?? internalOpen;
+  const setOpen = onExternalOpenChange ?? setInternalOpen;
   const [app, setApp] = useState<LoanApp>(loan.app);
   const [customAppName, setCustomAppName] = useState(loan.customAppName || "");
   const [amountBorrowed, setAmountBorrowed] = useState(String(loan.amountBorrowed));
@@ -66,9 +70,11 @@ export function EditLoanDialog({ loan, onUpdated }: EditLoanDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogTrigger render={<Button variant="ghost" size="sm" />}>
-        Edit
-      </DialogTrigger>
+      {externalOpen === undefined && (
+        <DialogTrigger render={<Button variant="ghost" size="sm" />}>
+          Edit
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Edit loan</DialogTitle>

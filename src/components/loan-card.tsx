@@ -4,10 +4,17 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal } from "lucide-react";
 import { Loan } from "@/lib/types";
 import { removeLoan, modifyLoan } from "@/lib/storage";
 import { generateGoogleCalendarUrl } from "@/lib/calendar";
-import { buttonVariants } from "@/components/ui/button";
 import { formatPHP, formatDate, getDaysUntilDate } from "@/lib/dates";
 import { RecordPaymentDialog } from "./record-payment-dialog";
 import { EditLoanDialog } from "./edit-loan-dialog";
@@ -20,6 +27,7 @@ interface LoanCardProps {
 
 export function LoanCard({ loan, onUpdate }: LoanCardProps) {
   const [showHistory, setShowHistory] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
   const displayName =
     loan.app === "Other" ? loan.customAppName || "Other" : loan.app;
@@ -50,7 +58,7 @@ export function LoanCard({ loan, onUpdate }: LoanCardProps) {
 
   return (
     <Card className="transition-shadow hover:shadow-md">
-      <CardContent className="p-4 sm:pt-6">
+      <CardContent className="p-4 sm:p-6">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2.5 sm:gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-sm font-bold text-primary sm:h-10 sm:w-10 sm:rounded-xl">
@@ -86,13 +94,13 @@ export function LoanCard({ loan, onUpdate }: LoanCardProps) {
         <div className="mt-3 grid grid-cols-3 gap-2 text-sm sm:mt-4 sm:gap-4">
           <div>
             <p className="text-xs text-muted-foreground sm:text-sm">Borrowed</p>
-            <p className="text-xs font-medium sm:text-sm">
+            <p className="truncate text-xs font-medium sm:text-sm">
               {formatPHP(loan.amountBorrowed)}
             </p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground sm:text-sm">Monthly</p>
-            <p className="text-xs font-medium sm:text-sm">
+            <p className="truncate text-xs font-medium sm:text-sm">
               {formatPHP(loan.monthlyPayment)}
             </p>
           </div>
@@ -112,7 +120,7 @@ export function LoanCard({ loan, onUpdate }: LoanCardProps) {
           </div>
         </div>
 
-        <div className="mt-3 grid grid-cols-2 gap-2 sm:mt-4 sm:flex sm:flex-wrap">
+        <div className="mt-3 flex items-center gap-2 sm:mt-4">
           {loan.status === "active" && (
             <RecordPaymentDialog
               loanId={loan.id}
@@ -122,45 +130,55 @@ export function LoanCard({ loan, onUpdate }: LoanCardProps) {
               onPaymentRecorded={onUpdate}
             />
           )}
-          <Button variant="outline" size="sm" onClick={handleToggleStatus}>
-            {loan.status === "active" ? "Mark as paid" : "Reactivate"}
-          </Button>
-          <a
-            href="https://gcash.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            Pay via GCash
-          </a>
-          <a
-            href="https://www.maya.ph"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            Pay via Maya
-          </a>
-          <a
-            href={calendarUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            Calendar
-          </a>
-          <EditLoanDialog loan={loan} onUpdated={onUpdate} />
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowHistory(!showHistory)}
-          >
-            {showHistory ? "Hide history" : "History"}
-          </Button>
-          <Button variant="ghost" size="sm" onClick={handleDelete}>
-            Delete
-          </Button>
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger
+              render={<Button variant="outline" size="icon-sm" />}
+            >
+              <MoreHorizontal className="size-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={handleToggleStatus}>
+                {loan.status === "active" ? "Mark as paid" : "Reactivate"}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowHistory(!showHistory)}>
+                {showHistory ? "Hide history" : "History"}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => window.open("https://gcash.com", "_blank")}
+              >
+                Pay via GCash
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => window.open("https://www.maya.ph", "_blank")}
+              >
+                Pay via Maya
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => window.open(calendarUrl, "_blank")}
+              >
+                Add to Calendar
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive data-highlighted:text-destructive"
+                onClick={handleDelete}
+              >
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
+
+        <EditLoanDialog
+          loan={loan}
+          onUpdated={onUpdate}
+          externalOpen={editOpen}
+          onExternalOpenChange={setEditOpen}
+        />
 
         {showHistory && <PaymentHistory loanId={loan.id} />}
       </CardContent>

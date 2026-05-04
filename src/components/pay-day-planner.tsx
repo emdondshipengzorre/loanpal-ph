@@ -3,6 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { CalendarDays } from "lucide-react";
 import { Loan, Bill, BillPayment } from "@/lib/types";
 import { formatPHP } from "@/lib/dates";
 
@@ -69,12 +70,13 @@ export function PayDayPlanner({
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <p className="text-muted-foreground">
-          No active loans or bills to plan around.
-        </p>
-        <p className="mt-1 text-sm text-muted-foreground/70">
-          Add loans or bills first, then come back here.
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
+          <CalendarDays className="size-7 text-muted-foreground" />
+        </div>
+        <h3 className="text-base font-semibold">Nothing to plan yet</h3>
+        <p className="mt-1 max-w-xs text-sm text-muted-foreground">
+          Add loans or bills first. The planner splits your obligations across your two monthly paychecks.
         </p>
       </div>
     );

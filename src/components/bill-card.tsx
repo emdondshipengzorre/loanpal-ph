@@ -4,10 +4,17 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal } from "lucide-react";
 import { Bill, BILL_CATEGORY_LABELS } from "@/lib/types";
 import { removeBill, modifyBill, recordBillPayment } from "@/lib/storage";
 import { generateGoogleCalendarUrl } from "@/lib/calendar";
-import { buttonVariants } from "@/components/ui/button";
 import { formatPHP, ordinalSuffix, getNextDueDate, getDaysUntilDue, getCurrentPeriod } from "@/lib/dates";
 import { RecordBillPaymentDialog } from "./record-bill-payment-dialog";
 import { BillPaymentHistory } from "./bill-payment-history";
@@ -60,7 +67,7 @@ export function BillCard({ bill, isPaidThisMonth, onUpdate }: BillCardProps) {
 
   return (
     <Card className="transition-shadow hover:shadow-md">
-      <CardContent className="p-4 sm:pt-6">
+      <CardContent className="p-4 sm:p-6">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2.5 sm:gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-sm font-bold text-primary sm:h-10 sm:w-10 sm:rounded-xl">
@@ -90,7 +97,7 @@ export function BillCard({ bill, isPaidThisMonth, onUpdate }: BillCardProps) {
         <div className="mt-3 grid grid-cols-3 gap-2 text-sm sm:mt-4 sm:gap-4">
           <div>
             <p className="text-xs text-muted-foreground sm:text-sm">Amount</p>
-            <p className="text-xs font-medium sm:text-sm">
+            <p className="truncate text-xs font-medium sm:text-sm">
               {formatPHP(bill.typicalAmount)}
             </p>
           </div>
@@ -126,57 +133,58 @@ export function BillCard({ bill, isPaidThisMonth, onUpdate }: BillCardProps) {
           </p>
         )}
 
-        <div className="mt-3 grid grid-cols-2 gap-2 sm:mt-4 sm:flex sm:flex-wrap">
+        <div className="mt-3 flex items-center gap-2 sm:mt-4">
           {bill.status === "active" && !isPaidThisMonth && (
-            <RecordBillPaymentDialog
-              billId={bill.id}
-              billName={displayName}
-              typicalAmount={bill.typicalAmount}
-              onPaymentRecorded={onUpdate}
-            />
+            <>
+              <RecordBillPaymentDialog
+                billId={bill.id}
+                billName={displayName}
+                typicalAmount={bill.typicalAmount}
+                onPaymentRecorded={onUpdate}
+              />
+              <Button variant="outline" size="sm" onClick={handleQuickPay}>
+                Mark paid
+              </Button>
+            </>
           )}
-          {bill.status === "active" && !isPaidThisMonth && (
-            <Button variant="outline" size="sm" onClick={handleQuickPay}>
-              Mark paid
-            </Button>
-          )}
-          <a
-            href="https://gcash.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            Pay via GCash
-          </a>
-          <a
-            href="https://www.maya.ph"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            Pay via Maya
-          </a>
-          <a
-            href={calendarUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            Calendar
-          </a>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowHistory(!showHistory)}
-          >
-            {showHistory ? "Hide history" : "History"}
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleToggleStatus}>
-            {bill.status === "active" ? "Pause" : "Resume"}
-          </Button>
-          <Button variant="ghost" size="sm" onClick={handleDelete}>
-            Delete
-          </Button>
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger
+              render={<Button variant="outline" size="icon-sm" />}
+            >
+              <MoreHorizontal className="size-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={handleToggleStatus}>
+                {bill.status === "active" ? "Pause" : "Resume"}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowHistory(!showHistory)}>
+                {showHistory ? "Hide history" : "History"}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => window.open("https://gcash.com", "_blank")}
+              >
+                Pay via GCash
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => window.open("https://www.maya.ph", "_blank")}
+              >
+                Pay via Maya
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => window.open(calendarUrl, "_blank")}
+              >
+                Add to Calendar
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive data-highlighted:text-destructive"
+                onClick={handleDelete}
+              >
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {showHistory && <BillPaymentHistory billId={bill.id} />}

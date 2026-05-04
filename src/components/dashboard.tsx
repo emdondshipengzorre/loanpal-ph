@@ -8,6 +8,7 @@ import { fetchLoans, fetchBills, fetchBillPaymentsForPeriod, fetchAllPayments, f
 import { formatPHP, getCurrentPeriod, ordinalSuffix } from "@/lib/dates";
 import { computeAlerts, fireNotifications, AlertItem } from "@/lib/alerts";
 import { useNotifications } from "@/lib/use-notifications";
+import { Banknote, Receipt, CalendarDays, Heart, BarChart3 } from "lucide-react";
 import { AddLoanDialog } from "./add-loan-dialog";
 import { AddBillDialog } from "./add-bill-dialog";
 import { LoanCard } from "./loan-card";
@@ -138,6 +139,10 @@ export function Dashboard() {
             />
           </div>
 
+          <p className="mt-4 text-xs text-muted-foreground/70">
+            Start with your most important payment
+          </p>
+
           <p className="mt-12 text-xs text-muted-foreground/60">
             Made for Filipinos, by Filipinos
           </p>
@@ -182,28 +187,32 @@ export function Dashboard() {
       <div className="mb-4 flex gap-1 rounded-lg bg-muted p-1 sm:mb-6">
         {(
           [
-            { key: "overview", label: "Overview" },
-            { key: "loans", label: "Loans" },
-            { key: "bills", label: "Bills" },
-            { key: "planner", label: "Planner" },
-            { key: "health", label: "Health" },
+            { key: "overview", label: "Overview", icon: BarChart3 },
+            { key: "loans", label: "Loans", icon: Banknote },
+            { key: "bills", label: "Bills", icon: Receipt },
+            { key: "planner", label: "Planner", icon: CalendarDays },
+            { key: "health", label: "Health", icon: Heart },
           ] as const
-        ).map((tab) => (
-          <Button
-            key={tab.key}
-            variant={activeTab === tab.key ? "default" : "ghost"}
-            size="sm"
-            className="flex-1"
-            onClick={() => setActiveTab(tab.key)}
-          >
-            {tab.label}
-          </Button>
-        ))}
+        ).map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <Button
+              key={tab.key}
+              variant={activeTab === tab.key ? "default" : "ghost"}
+              size="sm"
+              className="flex-1 gap-1"
+              onClick={() => setActiveTab(tab.key)}
+            >
+              <Icon className="size-3.5 shrink-0" />
+              <span className="hidden min-[400px]:inline text-xs">{tab.label}</span>
+            </Button>
+          );
+        })}
       </div>
 
       {/* Stats grid */}
       {activeTab === "loans" && (
-        <div className="mb-4 grid grid-cols-1 gap-3 sm:mb-6 sm:grid-cols-3 sm:gap-4">
+        <div className="mb-4 grid grid-cols-2 gap-3 sm:mb-6 sm:grid-cols-3 sm:gap-4">
           <div className="flex items-center justify-between rounded-xl border p-3 sm:block sm:p-4">
             <p className="text-sm text-muted-foreground">Active loans</p>
             <p className="text-xl font-bold sm:text-2xl">
@@ -212,13 +221,13 @@ export function Dashboard() {
           </div>
           <div className="flex items-center justify-between rounded-xl border p-3 sm:block sm:p-4">
             <p className="text-sm text-muted-foreground">Remaining balance</p>
-            <p className="text-xl font-bold sm:text-2xl">
+            <p className="truncate text-xl font-bold sm:text-2xl">
               {formatPHP(totalRemaining)}
             </p>
           </div>
-          <div className="flex items-center justify-between rounded-xl border p-3 sm:block sm:p-4">
+          <div className="col-span-2 flex items-center justify-between rounded-xl border p-3 sm:col-span-1 sm:block sm:p-4">
             <p className="text-sm text-muted-foreground">Monthly payment</p>
-            <p className="text-xl font-bold sm:text-2xl">
+            <p className="truncate text-xl font-bold sm:text-2xl">
               {formatPHP(totalMonthly)}
             </p>
           </div>
@@ -226,7 +235,7 @@ export function Dashboard() {
       )}
 
       {activeTab === "bills" && (
-        <div className="mb-4 grid grid-cols-1 gap-3 sm:mb-6 sm:grid-cols-3 sm:gap-4">
+        <div className="mb-4 grid grid-cols-2 gap-3 sm:mb-6 sm:grid-cols-3 sm:gap-4">
           <div className="flex items-center justify-between rounded-xl border p-3 sm:block sm:p-4">
             <p className="text-sm text-muted-foreground">Active bills</p>
             <p className="text-xl font-bold sm:text-2xl">
@@ -235,13 +244,13 @@ export function Dashboard() {
           </div>
           <div className="flex items-center justify-between rounded-xl border p-3 sm:block sm:p-4">
             <p className="text-sm text-muted-foreground">Monthly expenses</p>
-            <p className="text-xl font-bold sm:text-2xl">
+            <p className="truncate text-xl font-bold sm:text-2xl">
               {formatPHP(totalMonthlyBills)}
             </p>
           </div>
-          <div className="flex items-center justify-between rounded-xl border p-3 sm:block sm:p-4">
+          <div className="col-span-2 flex items-center justify-between rounded-xl border p-3 sm:col-span-1 sm:block sm:p-4">
             <p className="text-sm text-muted-foreground">Next due</p>
-            <p className="text-xl font-bold sm:text-2xl">
+            <p className="truncate text-xl font-bold sm:text-2xl">
               {nextDueBill
                 ? `${nextDueBill.provider === "Other" ? nextDueBill.customProviderName : nextDueBill.provider} (${ordinalSuffix(nextDueBill.dueDay)})`
                 : "All paid!"}
@@ -253,13 +262,22 @@ export function Dashboard() {
       {/* Content */}
       {activeTab === "loans" && (
         loans.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <p className="text-muted-foreground">No loans added yet.</p>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
+              <Banknote className="size-7 text-muted-foreground" />
+            </div>
+            <h3 className="text-base font-semibold">No loans yet</h3>
+            <p className="mt-1 max-w-xs text-sm text-muted-foreground">
+              Track your HomeCredit, Tala, or Cashalo loans. See your progress and never miss a payment.
+            </p>
             <AddLoanDialog
               onLoanAdded={refresh}
               triggerLabel="Add your first loan"
-              triggerClassName="mt-4"
+              triggerClassName="mt-6"
             />
+            <p className="mt-3 text-xs text-muted-foreground/50">
+              Takes less than a minute
+            </p>
           </div>
         ) : (
           <div className="grid gap-3 sm:gap-4">
@@ -272,13 +290,22 @@ export function Dashboard() {
 
       {activeTab === "bills" && (
         bills.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <p className="text-muted-foreground">No bills added yet.</p>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
+              <Receipt className="size-7 text-muted-foreground" />
+            </div>
+            <h3 className="text-base font-semibold">No bills yet</h3>
+            <p className="mt-1 max-w-xs text-sm text-muted-foreground">
+              Add your Meralco, PLDT, or rent. Get reminders before each due date.
+            </p>
             <AddBillDialog
               onBillAdded={refresh}
               triggerLabel="Add your first bill"
-              triggerClassName="mt-4"
+              triggerClassName="mt-6"
             />
+            <p className="mt-3 text-xs text-muted-foreground/50">
+              Takes less than a minute
+            </p>
           </div>
         ) : (
           <div className="grid gap-3 sm:gap-4">
@@ -303,16 +330,40 @@ export function Dashboard() {
       )}
 
       {activeTab === "health" && (
-        <HealthScoreView
-          loans={loans}
-          payments={allPayments}
-          bills={bills}
-          billPayments={allBillPayments}
-        />
+        loans.length === 0 && bills.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
+              <Heart className="size-7 text-muted-foreground" />
+            </div>
+            <h3 className="text-base font-semibold">No data yet</h3>
+            <p className="mt-1 max-w-xs text-sm text-muted-foreground">
+              Add loans or bills to see your payment health score and personalized tips.
+            </p>
+          </div>
+        ) : (
+          <HealthScoreView
+            loans={loans}
+            payments={allPayments}
+            bills={bills}
+            billPayments={allBillPayments}
+          />
+        )
       )}
 
       {activeTab === "overview" && (
-        <FinancialOverview loans={loans} bills={bills} />
+        loans.length === 0 && bills.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
+              <BarChart3 className="size-7 text-muted-foreground" />
+            </div>
+            <h3 className="text-base font-semibold">Your financial overview</h3>
+            <p className="mt-1 max-w-xs text-sm text-muted-foreground">
+              Add loans or bills to see your cash flow breakdown, debt timeline, and monthly summary.
+            </p>
+          </div>
+        ) : (
+          <FinancialOverview loans={loans} bills={bills} />
+        )
       )}
     </div>
   );
