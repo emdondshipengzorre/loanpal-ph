@@ -125,6 +125,22 @@ export function LoanCard({ loan, onUpdate }: LoanCardProps) {
             {loan.status === "active" ? "Mark as paid" : "Reactivate"}
           </Button>
           <a
+            href="https://gcash.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            Pay via GCash
+          </a>
+          <a
+            href="https://www.maya.ph"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            Pay via Maya
+          </a>
+          <a
             href={calendarUrl}
             target="_blank"
             rel="noopener noreferrer"

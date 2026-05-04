@@ -115,29 +115,29 @@ export function Dashboard() {
           </h1>
 
           <p className="mt-3 text-base text-muted-foreground sm:text-lg">
-            Manage your loans and bills in one place
+            Manage your utang and bills in one place
           </p>
 
           <p className="mt-2 text-sm text-muted-foreground">
-            Track HomeCredit, Tala, Meralco, PLDT and more — never miss
-            a payment again.
+            Track HomeCredit, Tala, Meralco, PLDT and more — huwag
+            palampasin ang bayad mo.
           </p>
 
           <div className="mt-8 flex gap-3">
             <AddLoanDialog
               onLoanAdded={refresh}
-              triggerLabel="Add a loan"
+              triggerLabel="Magdagdag ng utang"
               triggerSize="default"
             />
             <AddBillDialog
               onBillAdded={refresh}
-              triggerLabel="Add a bill"
+              triggerLabel="Magdagdag ng bill"
               triggerSize="default"
             />
           </div>
 
           <p className="mt-12 text-xs text-muted-foreground/60">
-            Built for Filipinos, by Filipinos
+            Gawa ng Pinoy, para sa Pinoy
           </p>
         </div>
       </div>
@@ -177,9 +177,9 @@ export function Dashboard() {
       <div className="mb-4 flex gap-1 rounded-lg bg-muted p-1 sm:mb-6">
         {(
           [
-            { key: "loans", label: "Loans" },
+            { key: "loans", label: "Utang" },
             { key: "bills", label: "Bills" },
-            { key: "planner", label: "Pay Day" },
+            { key: "planner", label: "Sweldo" },
             { key: "health", label: "Health" },
           ] as const
         ).map((tab) => (
@@ -199,19 +199,19 @@ export function Dashboard() {
       {activeTab === "loans" && (
         <div className="mb-4 grid grid-cols-1 gap-3 sm:mb-6 sm:grid-cols-3 sm:gap-4">
           <div className="flex items-center justify-between rounded-xl border p-3 sm:block sm:p-4">
-            <p className="text-sm text-muted-foreground">Active loans</p>
+            <p className="text-sm text-muted-foreground">Active na utang</p>
             <p className="text-xl font-bold sm:text-2xl">
               {activeLoans.length}
             </p>
           </div>
           <div className="flex items-center justify-between rounded-xl border p-3 sm:block sm:p-4">
-            <p className="text-sm text-muted-foreground">Total remaining</p>
+            <p className="text-sm text-muted-foreground">Natitirang balanse</p>
             <p className="text-xl font-bold sm:text-2xl">
               {formatPHP(totalRemaining)}
             </p>
           </div>
           <div className="flex items-center justify-between rounded-xl border p-3 sm:block sm:p-4">
-            <p className="text-sm text-muted-foreground">Monthly payments</p>
+            <p className="text-sm text-muted-foreground">Buwanang bayad</p>
             <p className="text-xl font-bold sm:text-2xl">
               {formatPHP(totalMonthly)}
             </p>
@@ -222,23 +222,23 @@ export function Dashboard() {
       {activeTab === "bills" && (
         <div className="mb-4 grid grid-cols-1 gap-3 sm:mb-6 sm:grid-cols-3 sm:gap-4">
           <div className="flex items-center justify-between rounded-xl border p-3 sm:block sm:p-4">
-            <p className="text-sm text-muted-foreground">Active bills</p>
+            <p className="text-sm text-muted-foreground">Active na bills</p>
             <p className="text-xl font-bold sm:text-2xl">
               {activeBills.length}
             </p>
           </div>
           <div className="flex items-center justify-between rounded-xl border p-3 sm:block sm:p-4">
-            <p className="text-sm text-muted-foreground">Monthly bills</p>
+            <p className="text-sm text-muted-foreground">Buwanang gastos</p>
             <p className="text-xl font-bold sm:text-2xl">
               {formatPHP(totalMonthlyBills)}
             </p>
           </div>
           <div className="flex items-center justify-between rounded-xl border p-3 sm:block sm:p-4">
-            <p className="text-sm text-muted-foreground">Next due</p>
+            <p className="text-sm text-muted-foreground">Susunod na due</p>
             <p className="text-xl font-bold sm:text-2xl">
               {nextDueBill
                 ? `${nextDueBill.provider === "Other" ? nextDueBill.customProviderName : nextDueBill.provider} (${ordinalSuffix(nextDueBill.dueDay)})`
-                : "All paid!"}
+                : "Bayad na lahat!"}
             </p>
           </div>
         </div>
@@ -248,10 +248,10 @@ export function Dashboard() {
       {activeTab === "loans" && (
         loans.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <p className="text-muted-foreground">No loans yet.</p>
+            <p className="text-muted-foreground">Wala ka pang utang dito.</p>
             <AddLoanDialog
               onLoanAdded={refresh}
-              triggerLabel="Add your first loan"
+              triggerLabel="Idagdag ang unang utang mo"
               triggerClassName="mt-4"
             />
           </div>
@@ -267,10 +267,10 @@ export function Dashboard() {
       {activeTab === "bills" && (
         bills.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <p className="text-muted-foreground">No bills yet.</p>
+            <p className="text-muted-foreground">Wala ka pang bills dito.</p>
             <AddBillDialog
               onBillAdded={refresh}
-              triggerLabel="Add your first bill"
+              triggerLabel="Idagdag ang unang bill mo"
               triggerClassName="mt-4"
             />
           </div>
