@@ -22,6 +22,7 @@ import { LOAN_APPS, Loan, LoanApp } from "@/lib/types";
 import { createLoan } from "@/lib/storage";
 import { generateGoogleCalendarUrl } from "@/lib/calendar";
 import { buttonVariants } from "@/components/ui/button";
+import { formatPHP } from "@/lib/dates";
 import { OcrUpload } from "./ocr-upload";
 import { ParsedLoanData } from "@/lib/ocr";
 
@@ -30,15 +31,6 @@ interface AddLoanDialogProps {
   triggerLabel?: string;
   triggerSize?: "sm" | "lg" | "default";
   triggerClassName?: string;
-}
-
-function formatPHP(amount: number) {
-  return new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(amount);
 }
 
 export function AddLoanDialog({

@@ -8,6 +8,7 @@ import { Loan } from "@/lib/types";
 import { removeLoan, modifyLoan } from "@/lib/storage";
 import { generateGoogleCalendarUrl } from "@/lib/calendar";
 import { buttonVariants } from "@/components/ui/button";
+import { formatPHP, formatDate, getDaysUntilDate } from "@/lib/dates";
 import { RecordPaymentDialog } from "./record-payment-dialog";
 import { PaymentHistory } from "./payment-history";
 
@@ -16,36 +17,12 @@ interface LoanCardProps {
   onUpdate: () => void;
 }
 
-function formatPHP(amount: number) {
-  return new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(amount);
-}
-
-function getDaysUntilDue(dateStr: string) {
-  const due = new Date(dateStr + "T00:00:00");
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-  return Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-}
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr + "T00:00:00").toLocaleDateString("en-PH", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
 export function LoanCard({ loan, onUpdate }: LoanCardProps) {
   const [showHistory, setShowHistory] = useState(false);
 
   const displayName =
     loan.app === "Other" ? loan.customAppName || "Other" : loan.app;
-  const daysUntilDue = getDaysUntilDue(loan.nextDueDate);
+  const daysUntilDue = getDaysUntilDate(loan.nextDueDate);
   const progress =
     ((loan.amountBorrowed - loan.remainingBalance) / loan.amountBorrowed) * 100;
 

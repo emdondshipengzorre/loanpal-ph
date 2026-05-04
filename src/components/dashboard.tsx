@@ -5,37 +5,19 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Loan, Bill, BillPayment } from "@/lib/types";
 import { fetchLoans, fetchBills, fetchBillPaymentsForPeriod } from "@/lib/storage";
+import { formatPHP, getCurrentPeriod, ordinalSuffix } from "@/lib/dates";
+import { computeAlerts, fireNotifications, AlertItem } from "@/lib/alerts";
+import { useNotifications } from "@/lib/use-notifications";
 import { AddLoanDialog } from "./add-loan-dialog";
 import { AddBillDialog } from "./add-bill-dialog";
 import { LoanCard } from "./loan-card";
 import { BillCard } from "./bill-card";
 import { PayDayPlanner } from "./pay-day-planner";
+import { AlertBanner } from "./alert-banner";
+import { NotificationBell } from "./notification-bell";
 import { AuthButton } from "./auth-button";
 
 type Tab = "loans" | "bills" | "planner";
-
-function formatPHP(amount: number) {
-  return new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(amount);
-}
-
-function getCurrentPeriod(): string {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-}
-
-function ordinalSuffix(day: number): string {
-  if (day >= 11 && day <= 13) return `${day}th`;
-  const lastDigit = day % 10;
-  if (lastDigit === 1) return `${day}st`;
-  if (lastDigit === 2) return `${day}nd`;
-  if (lastDigit === 3) return `${day}rd`;
-  return `${day}th`;
-}
 
 export function Dashboard() {
   const [loans, setLoans] = useState<Loan[]>([]);
@@ -43,6 +25,8 @@ export function Dashboard() {
   const [billPayments, setBillPayments] = useState<BillPayment[]>([]);
   const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("loans");
+  const [alerts, setAlerts] = useState<AlertItem[]>([]);
+  const { enabled: notificationsEnabled } = useNotifications();
 
   const refresh = useCallback(async () => {
     const [loanData, billData, periodPayments] = await Promise.all([
@@ -58,6 +42,23 @@ export function Dashboard() {
   useEffect(() => {
     refresh().then(() => setMounted(true));
   }, [refresh]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    const alertItems = computeAlerts(loans, bills, billPayments);
+    setAlerts(alertItems);
+    if (notificationsEnabled && alertItems.length > 0) {
+      fireNotifications(alertItems);
+    }
+  }, [mounted, loans, bills, billPayments, notificationsEnabled]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    const interval = setInterval(() => {
+      refresh();
+    }, 60 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [mounted, refresh]);
 
   if (!mounted) return null;
 
@@ -155,11 +156,14 @@ export function Dashboard() {
           {activeTab === "bills" && (
             <AddBillDialog onBillAdded={refresh} triggerSize="sm" />
           )}
+          <NotificationBell alerts={alerts} />
           <AuthButton />
         </div>
       </div>
 
       <Separator className="my-4 sm:my-6" />
+
+      <AlertBanner alerts={alerts} />
 
       {/* Tab switcher */}
       <div className="mb-4 flex gap-1 rounded-lg bg-muted p-1 sm:mb-6">

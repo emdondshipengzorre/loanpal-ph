@@ -3,26 +3,10 @@
 import { useEffect, useState } from "react";
 import { fetchPaymentsByLoanId } from "@/lib/storage";
 import { Payment } from "@/lib/types";
+import { formatPHP, formatDate } from "@/lib/dates";
 
 interface PaymentHistoryProps {
   loanId: string;
-}
-
-function formatPHP(amount: number) {
-  return new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(amount);
-}
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr + "T00:00:00").toLocaleDateString("en-PH", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
 }
 
 export function PaymentHistory({ loanId }: PaymentHistoryProps) {

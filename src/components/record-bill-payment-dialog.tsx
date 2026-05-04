@@ -12,17 +12,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { recordBillPayment } from "@/lib/storage";
+import { getCurrentPeriod } from "@/lib/dates";
 
 interface RecordBillPaymentDialogProps {
   billId: string;
   billName: string;
   typicalAmount: number;
   onPaymentRecorded: () => void;
-}
-
-function getCurrentPeriod(): string {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 }
 
 export function RecordBillPaymentDialog({

@@ -4,20 +4,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Loan, Bill, BillPayment } from "@/lib/types";
+import { formatPHP } from "@/lib/dates";
 
 interface PayDayPlannerProps {
   loans: Loan[];
   bills: Bill[];
   billPayments: BillPayment[];
-}
-
-function formatPHP(amount: number) {
-  return new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(amount);
 }
 
 interface PlannerItem {
