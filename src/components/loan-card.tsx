@@ -72,15 +72,17 @@ export function LoanCard({ loan, onUpdate }: LoanCardProps) {
 
   return (
     <Card className="transition-shadow hover:shadow-md">
-      <CardContent className="pt-6">
+      <CardContent className="p-4 sm:pt-6">
         <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-sm font-bold text-primary">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-sm font-bold text-primary sm:h-10 sm:w-10 sm:rounded-xl">
               {displayName.charAt(0)}
             </div>
             <div>
-              <h3 className="font-semibold">{displayName}</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="text-sm font-semibold sm:text-base">
+                {displayName}
+              </h3>
+              <p className="text-xs text-muted-foreground sm:text-sm">
                 {formatPHP(loan.remainingBalance)} remaining
               </p>
             </div>
@@ -90,7 +92,7 @@ export function LoanCard({ loan, onUpdate }: LoanCardProps) {
           </Badge>
         </div>
 
-        <div className="mt-4">
+        <div className="mt-3 sm:mt-4">
           <div className="mb-1 flex justify-between text-xs text-muted-foreground">
             <span>Paid off</span>
             <span>{Math.round(progress)}%</span>
@@ -103,18 +105,22 @@ export function LoanCard({ loan, onUpdate }: LoanCardProps) {
           </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-3 gap-4 text-sm">
+        <div className="mt-3 grid grid-cols-3 gap-2 text-sm sm:mt-4 sm:gap-4">
           <div>
-            <p className="text-muted-foreground">Borrowed</p>
-            <p className="font-medium">{formatPHP(loan.amountBorrowed)}</p>
+            <p className="text-xs text-muted-foreground sm:text-sm">Borrowed</p>
+            <p className="text-xs font-medium sm:text-sm">
+              {formatPHP(loan.amountBorrowed)}
+            </p>
           </div>
           <div>
-            <p className="text-muted-foreground">Monthly</p>
-            <p className="font-medium">{formatPHP(loan.monthlyPayment)}</p>
+            <p className="text-xs text-muted-foreground sm:text-sm">Monthly</p>
+            <p className="text-xs font-medium sm:text-sm">
+              {formatPHP(loan.monthlyPayment)}
+            </p>
           </div>
           <div>
-            <p className="text-muted-foreground">Due date</p>
-            <p className="font-medium">
+            <p className="text-xs text-muted-foreground sm:text-sm">Due date</p>
+            <p className="text-xs font-medium sm:text-sm">
               {formatDate(loan.nextDueDate)}
               {loan.status === "active" &&
                 daysUntilDue <= 3 &&
@@ -128,7 +134,7 @@ export function LoanCard({ loan, onUpdate }: LoanCardProps) {
           </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:mt-4 sm:flex sm:flex-wrap">
           {loan.status === "active" && (
             <RecordPaymentDialog
               loanId={loan.id}
@@ -147,14 +153,14 @@ export function LoanCard({ loan, onUpdate }: LoanCardProps) {
             rel="noopener noreferrer"
             className={buttonVariants({ variant: "outline", size: "sm" })}
           >
-            Add to Calendar
+            Calendar
           </a>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setShowHistory(!showHistory)}
           >
-            {showHistory ? "Hide history" : "View history"}
+            {showHistory ? "Hide history" : "History"}
           </Button>
           <Button variant="ghost" size="sm" onClick={handleDelete}>
             Delete
