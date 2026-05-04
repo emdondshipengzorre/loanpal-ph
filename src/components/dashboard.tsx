@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Loan, Bill, BillPayment } from "@/lib/types";
-import { fetchLoans, fetchBills, fetchBillPaymentsForPeriod } from "@/lib/storage";
+import { Loan, Bill, BillPayment, Payment } from "@/lib/types";
+import { fetchLoans, fetchBills, fetchBillPaymentsForPeriod, fetchAllPayments, fetchAllBillPayments } from "@/lib/storage";
 import { formatPHP, getCurrentPeriod, ordinalSuffix } from "@/lib/dates";
 import { computeAlerts, fireNotifications, AlertItem } from "@/lib/alerts";
 import { useNotifications } from "@/lib/use-notifications";
@@ -15,28 +15,36 @@ import { BillCard } from "./bill-card";
 import { PayDayPlanner } from "./pay-day-planner";
 import { AlertBanner } from "./alert-banner";
 import { NotificationBell } from "./notification-bell";
+import { HealthScoreView } from "./health-score-view";
 import { AuthButton } from "./auth-button";
 
-type Tab = "loans" | "bills" | "planner";
+type Tab = "loans" | "bills" | "planner" | "health";
 
 export function Dashboard() {
   const [loans, setLoans] = useState<Loan[]>([]);
   const [bills, setBills] = useState<Bill[]>([]);
   const [billPayments, setBillPayments] = useState<BillPayment[]>([]);
+  const [allPayments, setAllPayments] = useState<Payment[]>([]);
+  const [allBillPayments, setAllBillPayments] = useState<BillPayment[]>([]);
   const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("loans");
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const { enabled: notificationsEnabled } = useNotifications();
 
   const refresh = useCallback(async () => {
-    const [loanData, billData, periodPayments] = await Promise.all([
-      fetchLoans(),
-      fetchBills(),
-      fetchBillPaymentsForPeriod(getCurrentPeriod()),
-    ]);
+    const [loanData, billData, periodPayments, loanPayments, billPaymentsAll] =
+      await Promise.all([
+        fetchLoans(),
+        fetchBills(),
+        fetchBillPaymentsForPeriod(getCurrentPeriod()),
+        fetchAllPayments(),
+        fetchAllBillPayments(),
+      ]);
     setLoans(loanData);
     setBills(billData);
     setBillPayments(periodPayments);
+    setAllPayments(loanPayments);
+    setAllBillPayments(billPaymentsAll);
   }, []);
 
   useEffect(() => {
@@ -172,6 +180,7 @@ export function Dashboard() {
             { key: "loans", label: "Loans" },
             { key: "bills", label: "Bills" },
             { key: "planner", label: "Pay Day" },
+            { key: "health", label: "Health" },
           ] as const
         ).map((tab) => (
           <Button
@@ -284,6 +293,15 @@ export function Dashboard() {
           loans={loans}
           bills={bills}
           billPayments={billPayments}
+        />
+      )}
+
+      {activeTab === "health" && (
+        <HealthScoreView
+          loans={loans}
+          payments={allPayments}
+          bills={bills}
+          billPayments={allBillPayments}
         />
       )}
     </div>

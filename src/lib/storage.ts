@@ -114,6 +114,20 @@ export async function removeLoan(id: string): Promise<void> {
 
 // --- Payments ---
 
+export async function fetchAllPayments(): Promise<Payment[]> {
+  if (!useSupabase()) {
+    if (typeof window === "undefined") return [];
+    const data = localStorage.getItem(PAYMENTS_KEY);
+    return data ? JSON.parse(data) : [];
+  }
+  const sb = await getSupabase();
+  const { data } = await sb
+    .from("payments")
+    .select("*")
+    .order("date", { ascending: false });
+  return (data ?? []).map(dbPaymentToPayment);
+}
+
 export async function fetchPaymentsByLoanId(
   loanId: string
 ): Promise<Payment[]> {
@@ -247,6 +261,20 @@ export async function removeBill(id: string): Promise<void> {
 }
 
 // --- Bill Payments ---
+
+export async function fetchAllBillPayments(): Promise<BillPayment[]> {
+  if (!useSupabase()) {
+    if (typeof window === "undefined") return [];
+    const data = localStorage.getItem(BILL_PAYMENTS_KEY);
+    return data ? JSON.parse(data) : [];
+  }
+  const sb = await getSupabase();
+  const { data } = await sb
+    .from("bill_payments")
+    .select("*")
+    .order("date", { ascending: false });
+  return (data ?? []).map(dbBillPaymentToBillPayment);
+}
 
 export async function fetchBillPaymentsByBillId(
   billId: string
