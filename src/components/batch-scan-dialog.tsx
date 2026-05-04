@@ -47,6 +47,8 @@ export function BatchScanDialog({ onImported }: BatchScanDialogProps) {
   const [items, setItems] = useState<EditableItem[]>([]);
   const [importedCount, setImportedCount] = useState(0);
   const [preview, setPreview] = useState<string | null>(null);
+  const [sharedApp, setSharedApp] = useState<LoanApp>("Other");
+  const [sharedCustomName, setSharedCustomName] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   function reset() {
@@ -56,6 +58,8 @@ export function BatchScanDialog({ onImported }: BatchScanDialogProps) {
     setItems([]);
     setImportedCount(0);
     setPreview(null);
+    setSharedApp("Other");
+    setSharedCustomName("");
   }
 
   function handleClose(isOpen: boolean) {
@@ -84,6 +88,7 @@ export function BatchScanDialog({ onImported }: BatchScanDialogProps) {
         setStep("upload");
         return;
       }
+      if (parsed[0]?.app) setSharedApp(parsed[0].app);
       setItems(
         parsed.map((p) => ({
           ...p,
@@ -122,8 +127,8 @@ export function BatchScanDialog({ onImported }: BatchScanDialogProps) {
     for (const item of selected) {
       const loan: Loan = {
         id: crypto.randomUUID(),
-        app: item.app,
-        customAppName: item.app === "Other" ? item.customAppName || undefined : undefined,
+        app: sharedApp,
+        customAppName: sharedApp === "Other" ? sharedCustomName || undefined : undefined,
         amountBorrowed: item.amount,
         remainingBalance: item.amount,
         monthlyPayment: item.amount,
@@ -222,10 +227,41 @@ export function BatchScanDialog({ onImported }: BatchScanDialogProps) {
                 Detected: {items.length} item{items.length !== 1 ? "s" : ""}
               </DialogTitle>
             </DialogHeader>
+            <div className="grid gap-2">
+              <div>
+                <Label className="text-xs">Lending app (applies to all)</Label>
+                <Select
+                  value={sharedApp}
+                  onValueChange={(v) => setSharedApp((v ?? "Other") as LoanApp)}
+                >
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LOAN_APPS.map((a) => (
+                      <SelectItem key={a} value={a}>
+                        {a}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {sharedApp === "Other" && (
+                <div>
+                  <Label className="text-xs">App name</Label>
+                  <Input
+                    value={sharedCustomName}
+                    onChange={(e) => setSharedCustomName(e.target.value)}
+                    placeholder="Enter app name"
+                    className="h-8 text-xs"
+                  />
+                </div>
+              )}
+            </div>
             <p className="text-xs text-muted-foreground">
               Review and edit each item before importing. Uncheck to skip.
             </p>
-            <div className="grid max-h-[50vh] gap-3 overflow-y-auto">
+            <div className="grid max-h-[40vh] gap-3 overflow-y-auto">
               {items.map((item) => (
                 <div
                   key={item.id}
@@ -233,7 +269,7 @@ export function BatchScanDialog({ onImported }: BatchScanDialogProps) {
                     item.selected ? "" : "opacity-40"
                   }`}
                 >
-                  <div className="mb-2 flex items-center gap-2">
+                  <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
                       checked={item.selected}
@@ -251,74 +287,35 @@ export function BatchScanDialog({ onImported }: BatchScanDialogProps) {
                   </div>
 
                   {item.selected && (
-                    <div className="grid gap-2">
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <Label className="text-xs">Amount (PHP)</Label>
-                          <Input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={item.amount}
-                            onChange={(e) =>
-                              updateItem(
-                                item.id,
-                                "amount",
-                                parseFloat(e.target.value) || 0
-                              )
-                            }
-                            className="h-8 text-xs"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-xs">Due date</Label>
-                          <Input
-                            type="date"
-                            value={item.dueDate || ""}
-                            onChange={(e) =>
-                              updateItem(item.id, "dueDate", e.target.value)
-                            }
-                            className="h-8 text-xs"
-                          />
-                        </div>
+                    <div className="mt-2 grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-xs">Amount (PHP)</Label>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={item.amount}
+                          onChange={(e) =>
+                            updateItem(
+                              item.id,
+                              "amount",
+                              parseFloat(e.target.value) || 0
+                            )
+                          }
+                          className="h-8 text-xs"
+                        />
                       </div>
                       <div>
-                        <Label className="text-xs">Lending app</Label>
-                        <Select
-                          value={item.app}
-                          onValueChange={(v) =>
-                            updateItem(item.id, "app", v ?? "Other")
+                        <Label className="text-xs">Due date</Label>
+                        <Input
+                          type="date"
+                          value={item.dueDate || ""}
+                          onChange={(e) =>
+                            updateItem(item.id, "dueDate", e.target.value)
                           }
-                        >
-                          <SelectTrigger className="h-8 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {LOAN_APPS.map((a) => (
-                              <SelectItem key={a} value={a}>
-                                {a}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          className="h-8 text-xs"
+                        />
                       </div>
-                      {item.app === "Other" && (
-                        <div>
-                          <Label className="text-xs">App name</Label>
-                          <Input
-                            value={item.customAppName}
-                            onChange={(e) =>
-                              updateItem(
-                                item.id,
-                                "customAppName",
-                                e.target.value
-                              )
-                            }
-                            placeholder="Enter app name"
-                            className="h-8 text-xs"
-                          />
-                        </div>
-                      )}
                     </div>
                   )}
                 </div>
