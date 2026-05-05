@@ -14,6 +14,7 @@ interface PayDayPlannerProps {
 }
 
 interface PlannerItem {
+  id: string;
   name: string;
   amount: number;
   dueDay: number;
@@ -36,6 +37,7 @@ export function PayDayPlanner({
     ...loans
       .filter((l) => l.status === "active")
       .map((l) => ({
+        id: l.id,
         name:
           l.app === "Other" ? l.customAppName || "Other" : l.app,
         amount: l.monthlyPayment,
@@ -46,6 +48,7 @@ export function PayDayPlanner({
     ...bills
       .filter((b) => b.status === "active")
       .map((b) => ({
+        id: b.id,
         name:
           b.provider === "Other"
             ? b.customProviderName || "Other"
@@ -85,7 +88,7 @@ export function PayDayPlanner({
   function renderItem(item: PlannerItem) {
     return (
       <div
-        key={`${item.type}-${item.name}-${item.dueDay}`}
+        key={item.id}
         className="flex items-center justify-between py-1.5"
       >
         <div className="flex items-center gap-2">
