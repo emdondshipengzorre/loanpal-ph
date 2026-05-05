@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#09090b"/>
-  <text x="256" y="340" text-anchor="middle" font-family="system-ui, sans-serif" font-size="320" font-weight="700" fill="white">L</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="16" fill="#09090b"/>
+  <path d="M20 16V48H40C41.1 48 42 47.1 42 46C42 44.9 41.1 44 40 44H25V16C25 14.9 24.1 14 23 14H22C20.9 14 20 14.9 20 16Z" fill="white" fill-opacity="0.95"/>
+  <circle cx="43" cy="28" r="11" fill="white" fill-opacity="0.95"/>
+  <text x="43" y="33" text-anchor="middle" font-size="16" font-weight="700" font-family="system-ui, sans-serif" fill="#09090b">₱</text>
 </svg>
