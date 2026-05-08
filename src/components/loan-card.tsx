@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, CheckCircle, RotateCcw, Pencil, Clock, Wallet, CreditCard, CalendarPlus, Trash2 } from "lucide-react";
 import { Loan } from "@/lib/types";
+import { getLendingAppName } from "@/lib/lending-apps";
+import { LendingAppIcon } from "./app-picker";
 import { removeLoan, modifyLoan } from "@/lib/storage";
 import { generateGoogleCalendarUrl } from "@/lib/calendar";
 import { formatPHP, formatDate, getDaysUntilDate } from "@/lib/dates";
@@ -29,8 +31,7 @@ export function LoanCard({ loan, onUpdate }: LoanCardProps) {
   const [showHistory, setShowHistory] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
-  const displayName =
-    loan.app === "Other" ? loan.customAppName || "Other" : loan.app;
+  const displayName = getLendingAppName(loan.app, loan.customAppName);
   const daysUntilDue = getDaysUntilDate(loan.nextDueDate);
   const progress =
     ((loan.amountBorrowed - loan.remainingBalance) / loan.amountBorrowed) * 100;
@@ -61,9 +62,7 @@ export function LoanCard({ loan, onUpdate }: LoanCardProps) {
       <CardContent className="p-4 sm:p-6">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-sm font-bold text-primary sm:h-10 sm:w-10 sm:rounded-xl">
-              {displayName.charAt(0)}
-            </div>
+            <LendingAppIcon appId={loan.app} size={36} />
             <div>
               <h3 className="text-sm font-semibold sm:text-base">
                 {displayName}

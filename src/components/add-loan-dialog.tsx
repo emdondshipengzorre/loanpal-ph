@@ -12,14 +12,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { LOAN_APPS, Loan, LoanApp } from "@/lib/types";
+import { Loan, LoanApp } from "@/lib/types";
+import { AppPicker } from "./app-picker";
 import { createLoan } from "@/lib/storage";
 import { generateGoogleCalendarUrl } from "@/lib/calendar";
 import { buttonVariants } from "@/components/ui/button";
@@ -46,7 +40,7 @@ export function AddLoanDialog({
   const [lastLoan, setLastLoan] = useState<Loan | null>(null);
   const [scannedBanner, setScannedBanner] = useState(false);
 
-  const [app, setApp] = useState<LoanApp | "">("");
+  const [app, setApp] = useState("");
   const [customAppName, setCustomAppName] = useState("");
   const [amountBorrowed, setAmountBorrowed] = useState("");
   const [remainingBalance, setRemainingBalance] = useState("");
@@ -184,21 +178,11 @@ export function AddLoanDialog({
                 <form onSubmit={handleSubmit} className="grid gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="app">Lending app</Label>
-                    <Select
+                    <AppPicker
+                      id="app"
                       value={app}
-                      onValueChange={(v) => setApp(v as LoanApp)}
-                    >
-                      <SelectTrigger id="app">
-                        <SelectValue placeholder="Select an app" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {LOAN_APPS.map((a) => (
-                          <SelectItem key={a} value={a}>
-                            {a}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      onChange={setApp}
+                    />
                   </div>
 
                   {app === "Other" && (

@@ -1,3 +1,4 @@
+import TextRecognition from "@react-native-ml-kit/text-recognition";
 import { LENDING_APPS } from "./lending-apps";
 import { LoanApp } from "./types";
 
@@ -17,21 +18,9 @@ export interface ParsedLoanItem {
   selected: boolean;
 }
 
-export async function extractTextFromImage(
-  imageFile: File,
-  onProgress?: (progress: number) => void
-): Promise<string> {
-  const Tesseract = await import("tesseract.js");
-  const {
-    data: { text },
-  } = await Tesseract.recognize(imageFile, "eng", {
-    logger: (m: { status: string; progress: number }) => {
-      if (m.status === "recognizing text" && onProgress) {
-        onProgress(m.progress);
-      }
-    },
-  });
-  return text;
+export async function extractTextFromImage(imageUri: string): Promise<string> {
+  const result = await TextRecognition.recognize(imageUri);
+  return result.text;
 }
 
 function extractAmounts(text: string): number[] {
@@ -241,8 +230,7 @@ function parseFallbackItems(
   text: string,
   detectedApp?: LoanApp
 ): ParsedLoanItem[] {
-  const amountPattern =
-    /(?:PHP|₱|Php|P)\s*([\d,]+(?:\.\d{2})?)/g;
+  const amountPattern = /(?:PHP|₱|Php|P)\s*([\d,]+(?:\.\d{2})?)/g;
   const amounts: { value: number; index: number }[] = [];
   let match;
   while ((match = amountPattern.exec(text)) !== null) {

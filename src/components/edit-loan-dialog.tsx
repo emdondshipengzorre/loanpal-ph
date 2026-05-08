@@ -11,14 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { LOAN_APPS, Loan, LoanApp } from "@/lib/types";
+import { Loan, LoanApp } from "@/lib/types";
+import { AppPicker } from "./app-picker";
 import { modifyLoan } from "@/lib/storage";
 
 interface EditLoanDialogProps {
@@ -32,7 +26,7 @@ export function EditLoanDialog({ loan, onUpdated, externalOpen, onExternalOpenCh
   const [internalOpen, setInternalOpen] = useState(false);
   const open = externalOpen ?? internalOpen;
   const setOpen = onExternalOpenChange ?? setInternalOpen;
-  const [app, setApp] = useState<LoanApp>(loan.app);
+  const [app, setApp] = useState(loan.app);
   const [customAppName, setCustomAppName] = useState(loan.customAppName || "");
   const [amountBorrowed, setAmountBorrowed] = useState(String(loan.amountBorrowed));
   const [remainingBalance, setRemainingBalance] = useState(String(loan.remainingBalance));
@@ -82,21 +76,11 @@ export function EditLoanDialog({ loan, onUpdated, externalOpen, onExternalOpenCh
         <form onSubmit={handleSubmit} className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="edit-app">Lending app</Label>
-            <Select
+            <AppPicker
+              id="edit-app"
               value={app}
-              onValueChange={(v) => setApp((v ?? app) as LoanApp)}
-            >
-              <SelectTrigger id="edit-app">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {LOAN_APPS.map((a) => (
-                  <SelectItem key={a} value={a}>
-                    {a}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onChange={setApp}
+            />
           </div>
 
           {app === "Other" && (

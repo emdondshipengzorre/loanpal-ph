@@ -6,20 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { LOAN_APPS, Loan, LoanApp } from "@/lib/types";
+import { Loan, LoanApp } from "@/lib/types";
+import { AppPicker } from "./app-picker";
 import { createLoan } from "@/lib/storage";
 import { formatPHP } from "@/lib/dates";
 import {
@@ -48,7 +42,7 @@ export function BatchScanDialog({ onImported }: BatchScanDialogProps) {
   const [items, setItems] = useState<EditableItem[]>([]);
   const [importedCount, setImportedCount] = useState(0);
   const [preview, setPreview] = useState<string | null>(null);
-  const [sharedApp, setSharedApp] = useState<LoanApp>("Other");
+  const [sharedApp, setSharedApp] = useState("Other");
   const [sharedCustomName, setSharedCustomName] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -232,21 +226,10 @@ export function BatchScanDialog({ onImported }: BatchScanDialogProps) {
             <div className="grid gap-2">
               <div>
                 <Label className="text-xs">Lending app (applies to all)</Label>
-                <Select
+                <AppPicker
                   value={sharedApp}
-                  onValueChange={(v) => setSharedApp((v ?? "Other") as LoanApp)}
-                >
-                  <SelectTrigger className="h-8 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {LOAN_APPS.map((a) => (
-                      <SelectItem key={a} value={a}>
-                        {a}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onChange={setSharedApp}
+                />
               </div>
               {sharedApp === "Other" && (
                 <div>

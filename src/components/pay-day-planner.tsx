@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { CalendarDays } from "lucide-react";
 import { Loan, Bill, BillPayment } from "@/lib/types";
 import { formatPHP } from "@/lib/dates";
+import { getLendingAppName } from "@/lib/lending-apps";
 
 interface PayDayPlannerProps {
   loans: Loan[];
@@ -38,8 +39,7 @@ export function PayDayPlanner({
       .filter((l) => l.status === "active")
       .map((l) => ({
         id: l.id,
-        name:
-          l.app === "Other" ? l.customAppName || "Other" : l.app,
+        name: getLendingAppName(l.app, l.customAppName),
         amount: l.monthlyPayment,
         dueDay: getDueDayFromLoan(l),
         type: "loan" as const,

@@ -27,8 +27,6 @@ export interface Payment {
   createdAt: string;
 }
 
-// --- Bill types ---
-
 export const BILL_CATEGORIES = [
   "utilities",
   "telecom",

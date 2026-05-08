@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Loan, Bill } from "@/lib/types";
 import { formatPHP } from "@/lib/dates";
+import { getLendingAppName } from "@/lib/lending-apps";
 import { getMonthlyIncome, setMonthlyIncome } from "@/lib/storage";
 
 interface FinancialOverviewProps {
@@ -241,10 +242,7 @@ export function FinancialOverview({ loans, bills }: FinancialOverviewProps) {
             {activeLoans
               .sort((a, b) => b.remainingBalance - a.remainingBalance)
               .map((loan) => {
-                const name =
-                  loan.app === "Other"
-                    ? loan.customAppName || "Other"
-                    : loan.app;
+                const name = getLendingAppName(loan.app, loan.customAppName);
                 return (
                   <Bar
                     key={loan.id}
