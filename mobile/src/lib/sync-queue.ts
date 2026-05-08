@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import NetInfo from "@react-native-community/netinfo";
+import * as Network from "expo-network";
 import { supabase } from "./supabase";
 
 const QUEUE_KEY = "loanpal-sync-queue";
@@ -30,7 +30,7 @@ export async function getQueue(): Promise<QueuedOperation[]> {
 }
 
 export async function processQueue(): Promise<{ processed: number; failed: number }> {
-  const state = await NetInfo.fetch();
+  const state = await Network.getNetworkStateAsync();
   if (!state.isConnected) return { processed: 0, failed: 0 };
 
   const { data: sessionData } = await supabase.auth.getSession();
@@ -62,12 +62,15 @@ export async function processQueue(): Promise<{ processed: number; failed: numbe
 }
 
 export function startSyncListener(onSync?: (result: { processed: number; failed: number }) => void) {
-  return NetInfo.addEventListener(async (state) => {
+  const interval = setInterval(async () => {
+    const state = await Network.getNetworkStateAsync();
     if (state.isConnected) {
       const result = await processQueue();
       if (result.processed > 0 && onSync) {
         onSync(result);
       }
     }
-  });
+  }, 30000);
+
+  return () => clearInterval(interval);
 }
