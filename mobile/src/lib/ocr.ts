@@ -1,6 +1,12 @@
-import TextRecognition from "@react-native-ml-kit/text-recognition";
 import { LENDING_APPS } from "./lending-apps";
 import { LoanApp } from "./types";
+
+let TextRecognition: { recognize: (uri: string) => Promise<{ text: string }> } | null = null;
+try {
+  TextRecognition = require("@react-native-ml-kit/text-recognition").default;
+} catch {
+  // ML Kit not available in this build
+}
 
 export interface ParsedLoanData {
   app?: LoanApp;
@@ -19,8 +25,15 @@ export interface ParsedLoanItem {
 }
 
 export async function extractTextFromImage(imageUri: string): Promise<string> {
+  if (!TextRecognition) {
+    throw new Error("OCR is not available in this build. A custom dev client with ML Kit is required.");
+  }
   const result = await TextRecognition.recognize(imageUri);
   return result.text;
+}
+
+export function isOcrAvailable(): boolean {
+  return TextRecognition !== null;
 }
 
 function extractAmounts(text: string): number[] {

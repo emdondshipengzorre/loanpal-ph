@@ -16,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import {
   extractTextFromImage,
   parseMultipleLoans,
+  isOcrAvailable,
   ParsedLoanItem,
 } from "../src/lib/ocr";
 import { useLoanStore } from "../src/store/loanStore";
@@ -116,6 +117,32 @@ export default function ScanScreen() {
     setRawText("");
     setItems([]);
   };
+
+  if (!isOcrAvailable()) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="close" size={28} color={colors.foreground} />
+          </TouchableOpacity>
+          <Text style={typography.h3}>Scan Document</Text>
+          <View style={{ width: 28 }} />
+        </View>
+        <View style={styles.centered}>
+          <Ionicons name="construct-outline" size={48} color={colors.mutedForeground} />
+          <Text style={[typography.body, { color: colors.mutedForeground, marginTop: spacing.md, textAlign: "center" }]}>
+            OCR scanning requires a custom build with ML Kit. Use manual entry for now.
+          </Text>
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={() => { router.back(); router.push("/loan/new"); }}
+          >
+            <Text style={styles.primaryButtonText}>Add Loan Manually</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
 
   if (!permission) {
     return (
