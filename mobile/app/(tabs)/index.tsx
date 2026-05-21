@@ -142,6 +142,13 @@ export default function OverviewScreen() {
               <Ionicons name="card-outline" size={22} color={colors.primary} />
               <Text style={styles.actionLabel}>Maya</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => router.push("/sms")}
+            >
+              <Ionicons name="chatbubble-outline" size={22} color={colors.primary} />
+              <Text style={styles.actionLabel}>SMS Scan</Text>
+            </TouchableOpacity>
           </View>
         </View>
       )}
