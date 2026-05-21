@@ -15,7 +15,7 @@ import { useSettingsStore } from "../../src/store/settingsStore";
 import { computeAlerts, AlertItem } from "../../src/lib/alerts";
 import { formatPHP, formatDate, getDaysUntilDate } from "../../src/lib/dates";
 import { getLendingAppName } from "../../src/lib/lending-apps";
-import { scheduleAlertNotifications } from "../../src/lib/notifications";
+import { scheduleAlertNotifications, scheduleAllReminders } from "../../src/lib/notifications";
 import { exportPaymentHistory } from "../../src/lib/export";
 import { openGCash, openMaya } from "../../src/lib/calendar";
 import { successFeedback, lightTap } from "../../src/lib/haptics";
@@ -64,7 +64,8 @@ export default function OverviewScreen() {
     if (alerts.length > 0) {
       scheduleAlertNotifications(alerts);
     }
-  }, [alerts.length]);
+    scheduleAllReminders(loans, bills);
+  }, [alerts.length, loans.length, bills.length]);
 
   const handleExport = async () => {
     await exportPaymentHistory(loans, payments, bills, billPayments);

@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { Bill, BillPayment } from "../lib/types";
 import * as storage from "../lib/storage";
+import { scheduleDueDateReminder, cancelReminder } from "../lib/notifications";
+import { getNextDueDate } from "../lib/dates";
 
 interface BillState {
   bills: Bill[];
@@ -15,7 +17,7 @@ interface BillState {
   recordBillPayment: (billId: string, amount: number, period: string, note?: string) => Promise<void>;
 }
 
-export const useBillStore = create<BillState>((set) => ({
+export const useBillStore = create<BillState>((set, get) => ({
   bills: [],
   billPayments: [],
   loading: false,
@@ -34,6 +36,8 @@ export const useBillStore = create<BillState>((set) => ({
   addBill: async (billData) => {
     const bill = await storage.createBill(billData);
     set((s) => ({ bills: [bill, ...s.bills] }));
+    const name = bill.provider === "Other" ? bill.customProviderName || "Other" : bill.provider;
+    scheduleDueDateReminder(bill.id, "bill", name, bill.typicalAmount, getNextDueDate(bill.dueDay));
   },
 
   updateBill: async (id, updates) => {
@@ -41,11 +45,20 @@ export const useBillStore = create<BillState>((set) => ({
     set((s) => ({
       bills: s.bills.map((b) => (b.id === id ? { ...b, ...updates } : b)),
     }));
+    if (updates.dueDay || updates.typicalAmount) {
+      const updated = get().bills.find((b) => b.id === id);
+      if (updated) {
+        await cancelReminder(id);
+        const name = updated.provider === "Other" ? updated.customProviderName || "Other" : updated.provider;
+        scheduleDueDateReminder(id, "bill", name, updated.typicalAmount, getNextDueDate(updated.dueDay));
+      }
+    }
   },
 
   deleteBill: async (id) => {
     await storage.removeBill(id);
     set((s) => ({ bills: s.bills.filter((b) => b.id !== id) }));
+    cancelReminder(id);
   },
 
   recordBillPayment: async (billId, amount, period, note) => {

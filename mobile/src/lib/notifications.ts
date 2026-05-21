@@ -24,7 +24,13 @@ export async function requestNotificationPermissions(): Promise<boolean> {
   return status === "granted";
 }
 
+async function isNotificationsEnabled(): Promise<boolean> {
+  const val = await AsyncStorage.getItem("loanpal-notifications");
+  return val !== "false";
+}
+
 export async function scheduleAlertNotifications(alerts: AlertItem[]) {
+  if (!(await isNotificationsEnabled())) return;
   const hasPermission = await requestNotificationPermissions();
   if (!hasPermission) return;
 
@@ -33,7 +39,12 @@ export async function scheduleAlertNotifications(alerts: AlertItem[]) {
 
     const { title, body } = buildContent(alert);
     await Notifications.scheduleNotificationAsync({
-      content: { title, body, sound: true },
+      content: {
+        title,
+        body,
+        sound: true,
+        data: { type: alert.type, id: alert.id },
+      },
       trigger: null,
     });
     await markAsNotified(alert.id);
@@ -42,10 +53,12 @@ export async function scheduleAlertNotifications(alerts: AlertItem[]) {
 
 export async function scheduleDueDateReminder(
   itemId: string,
+  type: "loan" | "bill",
   name: string,
   amount: number,
   dueDate: string
 ) {
+  if (!(await isNotificationsEnabled())) return;
   const hasPermission = await requestNotificationPermissions();
   if (!hasPermission) return;
 
@@ -59,6 +72,7 @@ export async function scheduleDueDateReminder(
       title: `Payment due tomorrow: ${name}`,
       body: `${formatPHP(amount)} due on ${formatDate(dueDate)}`,
       sound: true,
+      data: { type, id: itemId },
     },
     trigger: { date: reminderDate, type: Notifications.SchedulableTriggerInputTypes.DATE },
     identifier: `reminder-${itemId}`,
@@ -67,6 +81,40 @@ export async function scheduleDueDateReminder(
 
 export async function cancelReminder(itemId: string) {
   await Notifications.cancelScheduledNotificationAsync(`reminder-${itemId}`);
+}
+
+export async function scheduleAllReminders(
+  loans: { id: string; app: string; customAppName?: string; monthlyPayment: number; nextDueDate: string; status: string }[],
+  bills: { id: string; provider: string; customProviderName?: string; typicalAmount: number; dueDay: number; status: string }[]
+) {
+  if (!(await isNotificationsEnabled())) return;
+  const hasPermission = await requestNotificationPermissions();
+  if (!hasPermission) return;
+
+  const { getNextDueDate } = await import("./dates");
+
+  for (const loan of loans) {
+    if (loan.status !== "active") continue;
+    scheduleDueDateReminder(
+      loan.id,
+      "loan",
+      loan.app === "Other" ? loan.customAppName || "Other" : loan.app,
+      loan.monthlyPayment,
+      loan.nextDueDate
+    );
+  }
+
+  for (const bill of bills) {
+    if (bill.status !== "active") continue;
+    const name = bill.provider === "Other" ? bill.customProviderName || "Other" : bill.provider;
+    scheduleDueDateReminder(bill.id, "bill", name, bill.typicalAmount, getNextDueDate(bill.dueDay));
+  }
+}
+
+export function addNotificationResponseListener(
+  handler: (response: Notifications.NotificationResponse) => void
+) {
+  return Notifications.addNotificationResponseReceivedListener(handler);
 }
 
 function buildContent(alert: AlertItem): { title: string; body: string } {

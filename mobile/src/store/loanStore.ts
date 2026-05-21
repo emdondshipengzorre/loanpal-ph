@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { Loan, Payment } from "../lib/types";
 import * as storage from "../lib/storage";
+import { scheduleDueDateReminder, cancelReminder } from "../lib/notifications";
+import { getLendingAppName } from "../lib/lending-apps";
 
 interface LoanState {
   loans: Loan[];
@@ -34,18 +36,37 @@ export const useLoanStore = create<LoanState>((set, get) => ({
   addLoan: async (loanData) => {
     const loan = await storage.createLoan(loanData);
     set((s) => ({ loans: [loan, ...s.loans] }));
+    scheduleDueDateReminder(
+      loan.id,
+      "loan",
+      getLendingAppName(loan.app, loan.customAppName),
+      loan.monthlyPayment,
+      loan.nextDueDate
+    );
   },
 
   updateLoan: async (id, updates) => {
     await storage.modifyLoan(id, updates);
+    const updated = { ...get().loans.find((l) => l.id === id)!, ...updates };
     set((s) => ({
       loans: s.loans.map((l) => (l.id === id ? { ...l, ...updates } : l)),
     }));
+    if (updates.nextDueDate || updates.monthlyPayment) {
+      await cancelReminder(id);
+      scheduleDueDateReminder(
+        id,
+        "loan",
+        getLendingAppName(updated.app, updated.customAppName),
+        updated.monthlyPayment,
+        updated.nextDueDate
+      );
+    }
   },
 
   deleteLoan: async (id) => {
     await storage.removeLoan(id);
     set((s) => ({ loans: s.loans.filter((l) => l.id !== id) }));
+    cancelReminder(id);
   },
 
   recordPayment: async (loanId, amount, note) => {
@@ -66,6 +87,16 @@ export const useLoanStore = create<LoanState>((set, get) => ({
         payments: [payment, ...s.payments],
         loans: s.loans.map((l) => (l.id === loanId ? { ...l, ...updates } : l)),
       }));
+      if (updates.nextDueDate && updates.status !== "paid") {
+        await cancelReminder(loanId);
+        scheduleDueDateReminder(
+          loanId,
+          "loan",
+          getLendingAppName(loan.app, loan.customAppName),
+          loan.monthlyPayment,
+          updates.nextDueDate
+        );
+      }
     }
   },
 }));
