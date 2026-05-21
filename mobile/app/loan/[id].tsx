@@ -23,7 +23,12 @@ import { spacing, borderRadius } from "../../src/theme/spacing";
 
 export default function LoanDetailScreen() {
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, prefillApp, prefillAmount, prefillDueDate } = useLocalSearchParams<{
+    id: string;
+    prefillApp?: string;
+    prefillAmount?: string;
+    prefillDueDate?: string;
+  }>();
   const loans = useLoanStore((s) => s.loans);
   const payments = useLoanStore((s) => s.payments);
   const addLoan = useLoanStore((s) => s.addLoan);
@@ -39,14 +44,18 @@ export default function LoanDetailScreen() {
 
   const [mode, setMode] = useState<"view" | "edit" | "pay">(isNew ? "edit" : "view");
 
-  const [app, setApp] = useState(loan?.app ?? "");
+  const [app, setApp] = useState(loan?.app ?? prefillApp ?? "");
   const [customAppName, setCustomAppName] = useState(loan?.customAppName ?? "");
-  const [amountBorrowed, setAmountBorrowed] = useState(loan ? String(loan.amountBorrowed) : "");
+  const [amountBorrowed, setAmountBorrowed] = useState(
+    loan ? String(loan.amountBorrowed) : prefillAmount ?? ""
+  );
   const [remainingBalance, setRemainingBalance] = useState(
-    loan ? String(loan.remainingBalance) : ""
+    loan ? String(loan.remainingBalance) : prefillAmount ?? ""
   );
   const [monthlyPayment, setMonthlyPayment] = useState(loan ? String(loan.monthlyPayment) : "");
-  const [nextDueDate, setNextDueDate] = useState(loan?.nextDueDate ?? "");
+  const [nextDueDate, setNextDueDate] = useState(
+    loan?.nextDueDate ?? prefillDueDate ?? ""
+  );
 
   const [payAmount, setPayAmount] = useState(loan ? String(loan.monthlyPayment) : "");
   const [payNote, setPayNote] = useState("");

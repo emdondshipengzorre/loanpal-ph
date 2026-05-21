@@ -141,6 +141,27 @@ function isFinanceRelated(body: string): boolean {
   return FINANCE_KEYWORDS.some((kw) => lower.includes(kw));
 }
 
+const BILL_SENDER_MAP: { pattern: RegExp; category: string; provider: string }[] = [
+  { pattern: /meralco/i, category: "utilities", provider: "Meralco" },
+  { pattern: /visayan\s*electric/i, category: "utilities", provider: "Visayan Electric" },
+  { pattern: /manila\s*water/i, category: "utilities", provider: "Manila Water" },
+  { pattern: /maynilad/i, category: "utilities", provider: "Maynilad" },
+  { pattern: /pldt/i, category: "telecom", provider: "PLDT" },
+  { pattern: /globe/i, category: "telecom", provider: "Globe" },
+  { pattern: /converge/i, category: "telecom", provider: "Converge" },
+  { pattern: /smart/i, category: "telecom", provider: "Smart" },
+  { pattern: /philhealth/i, category: "insurance", provider: "PhilHealth" },
+  { pattern: /\bsss\b/i, category: "insurance", provider: "SSS" },
+  { pattern: /pag.?ibig/i, category: "insurance", provider: "Pag-IBIG" },
+];
+
+export function detectBillProvider(body: string): { category: string; provider: string } | undefined {
+  for (const entry of BILL_SENDER_MAP) {
+    if (entry.pattern.test(body)) return { category: entry.category, provider: entry.provider };
+  }
+  return undefined;
+}
+
 export async function readFinanceSms(days: number = 90): Promise<FinanceSms[]> {
   const minDate = Date.now() - days * 24 * 60 * 60 * 1000;
 

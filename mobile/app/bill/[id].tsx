@@ -27,7 +27,14 @@ import { spacing, borderRadius } from "../../src/theme/spacing";
 
 export default function BillDetailScreen() {
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, prefillCategory, prefillProvider, prefillAmount, prefillDueDay } =
+    useLocalSearchParams<{
+      id: string;
+      prefillCategory?: string;
+      prefillProvider?: string;
+      prefillAmount?: string;
+      prefillDueDay?: string;
+    }>();
   const bills = useBillStore((s) => s.bills);
   const billPayments = useBillStore((s) => s.billPayments);
   const addBill = useBillStore((s) => s.addBill);
@@ -46,11 +53,17 @@ export default function BillDetailScreen() {
 
   const [mode, setMode] = useState<"view" | "edit" | "pay">(isNew ? "edit" : "view");
 
-  const [category, setCategory] = useState<BillCategory | "">(bill?.category ?? "");
-  const [provider, setProvider] = useState(bill?.provider ?? "");
+  const [category, setCategory] = useState<BillCategory | "">(
+    bill?.category ?? (prefillCategory as BillCategory) ?? ""
+  );
+  const [provider, setProvider] = useState(bill?.provider ?? prefillProvider ?? "");
   const [customProviderName, setCustomProviderName] = useState(bill?.customProviderName ?? "");
-  const [typicalAmount, setTypicalAmount] = useState(bill ? String(bill.typicalAmount) : "");
-  const [dueDay, setDueDay] = useState(bill ? String(bill.dueDay) : "");
+  const [typicalAmount, setTypicalAmount] = useState(
+    bill ? String(bill.typicalAmount) : prefillAmount ?? ""
+  );
+  const [dueDay, setDueDay] = useState(
+    bill ? String(bill.dueDay) : prefillDueDay ?? ""
+  );
   const [notes, setNotes] = useState(bill?.notes ?? "");
 
   const [payAmount, setPayAmount] = useState(bill ? String(bill.typicalAmount) : "");

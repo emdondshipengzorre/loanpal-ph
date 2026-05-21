@@ -15,8 +15,10 @@ import {
   readFinanceSms,
   requestSmsPermission,
   hasSmsPermission,
+  detectBillProvider,
 } from "../src/lib/sms";
 import { getLendingAppName } from "../src/lib/lending-apps";
+import { successFeedback } from "../src/lib/haptics";
 import { colors } from "../src/theme/colors";
 import { typography } from "../src/theme/typography";
 import { spacing, borderRadius } from "../src/theme/spacing";
@@ -48,6 +50,31 @@ export default function SmsScreen() {
   const [permitted, setPermitted] = useState(false);
   const [filter, setFilter] = useState<FilterType>("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const importAsLoan = (sms: FinanceSms) => {
+    successFeedback();
+    const params: Record<string, string> = {};
+    if (sms.app) params.prefillApp = sms.app;
+    if (sms.amount) params.prefillAmount = String(sms.amount);
+    if (sms.dueDate) params.prefillDueDate = sms.dueDate;
+    router.push({ pathname: "/loan/[id]", params: { id: "new", ...params } });
+  };
+
+  const importAsBill = (sms: FinanceSms) => {
+    successFeedback();
+    const params: Record<string, string> = {};
+    const detected = detectBillProvider(sms.body);
+    if (detected) {
+      params.prefillCategory = detected.category;
+      params.prefillProvider = detected.provider;
+    }
+    if (sms.amount) params.prefillAmount = String(sms.amount);
+    if (sms.dueDate) {
+      const day = parseInt(sms.dueDate.split("-")[2]);
+      if (day >= 1 && day <= 31) params.prefillDueDay = String(day);
+    }
+    router.push({ pathname: "/bill/[id]", params: { id: "new", ...params } });
+  };
 
   const loadMessages = useCallback(async () => {
     setLoading(true);
@@ -187,6 +214,25 @@ export default function SmsScreen() {
                   </View>
                 )}
               </View>
+
+              {expanded && item.type !== "promo" && (
+                <View style={styles.importRow}>
+                  <TouchableOpacity
+                    style={styles.importButton}
+                    onPress={() => importAsLoan(item)}
+                  >
+                    <Ionicons name="wallet-outline" size={16} color={colors.primary} />
+                    <Text style={styles.importButtonText}>Import as Loan</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.importButton}
+                    onPress={() => importAsBill(item)}
+                  >
+                    <Ionicons name="receipt-outline" size={16} color="#f59e0b" />
+                    <Text style={styles.importButtonText}>Import as Bill</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </TouchableOpacity>
           );
         }}
@@ -271,6 +317,26 @@ const styles = StyleSheet.create({
     backgroundColor: colors.muted,
   },
   appChipText: { ...typography.caption, color: colors.foreground },
+  importRow: {
+    flexDirection: "row",
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+    paddingTop: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  importButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  importButtonText: { ...typography.caption, color: colors.foreground, fontWeight: "600" },
   centered: { flex: 1, alignItems: "center", justifyContent: "center", padding: spacing.xl },
   emptyContainer: { flex: 1 },
   emptyTitle: { ...typography.h3, color: colors.foreground, marginTop: spacing.md },
